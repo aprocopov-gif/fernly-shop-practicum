@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ord-zero",
+    "status": "placed",
+    "createdAt": "2026-11-05T15:00:00.000Z",
+    "lines": [
+      {
+        "id": "ln-zero-1",
+        "plantId": "pl-cutting",
+        "name": "Succulent Cutting",
+        "size": "S",
+        "unitPrice": 0,
+        "quantity": 1,
+        "lineTotal": 0,
+        "imageUrl": "/plants/succulent.svg"
+      }
+    ],
+    "subtotal": 0,
+    "discount": 0,
+    "promoCode": null,
+    "shipping": 0,
+    "total": 0,
+    "shippingAddress": {
+      "fullName": "Ava Green",
+      "address": "1 Fern Lane",
+      "city": "Portland",
+      "postalCode": "97201"
+    }
+  }
+]

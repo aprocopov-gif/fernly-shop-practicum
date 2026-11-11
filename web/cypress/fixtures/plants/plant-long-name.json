@@ -1,0 +1,19 @@
+{
+  "id": "pl-thai",
+  "name": "Variegated Thai Constellation Monstera (Collector's Edition, Limited Greenhouse Batch, Greenhouse Row Twelve, North Bench)",
+  "latinName": "Monstera deliciosa 'Thai Constellation'",
+  "price": 189,
+  "light": "bright",
+  "careLevel": 3,
+  "petSafe": false,
+  "stock": 2,
+  "rating": 4.9,
+  "imageUrl": "/plants/monstera.svg",
+  "description": "A rare variegated collector plant with large split leaves.",
+  "sizes": [
+    { "label": "S", "priceDelta": 0 },
+    { "label": "M", "priceDelta": 20 },
+    { "label": "L", "priceDelta": 40 }
+  ],
+  "similar": []
+}

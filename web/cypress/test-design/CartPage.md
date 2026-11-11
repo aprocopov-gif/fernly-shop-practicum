@@ -2,7 +2,9 @@
 
 Page: `web/src/pages/CartPage.tsx` (`/cart`). API: `GET /api/cart`; `PATCH /api/cart/lines/{lineId}`; `DELETE /api/cart/lines/{lineId}`. Renders `CartLine`, `OrderSummary`, `CartSummarySlot` (empty slot folder today), empty/error/loading states, checkout link.
 
-Status: **approved** — implemented in `web/cypress/ui/cart.cy.ts`.
+Status: **approved** — implemented in `web/cypress/ui/cart.cy.ts`. Class-required coverage already present: **normal** CP-01, **empty** CP-08, **500** CP-07, **signed out** CP-06, **extreme** CP-04 (long name) / CP-05 (zero price) / CP-16 (slow). Signed-in mocks stub `GET /api/auth/me` and `GET /api/cart` (see `openCart` in the spec).
+
+No rewrite needed unless this table changes. Plant and Orders designs are separate pending files.
 
 | ID | kind | given | the user does | expected | source | technique |
 |----|------|-------|---------------|----------|--------|-----------|
