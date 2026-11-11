@@ -4,7 +4,7 @@ Component: `web/src/components/PriceTag.tsx`. Props: `amount: number`, `size?: '
 
 Used on: `PlantCard` (price), `PlantPage` (`lg`, label "Price"), `CartLine` (`sm` "Price each", `md` "Line total"), `OrderSummary` (subtotal, shipping, `lg` total), `OrdersPage` ("Total", "Line total").
 
-Status: **awaiting approval** — no test code yet.
+Status: **approved** — human asked for tests from this table. Spec: `web/cypress/component/PriceTag.cy.tsx`. Rows PT-08/PT-09/PT-10 skipped (`assumed — ask`).
 
 | ID | kind | given | the user does | expected | source | technique |
 |----|------|-------|---------------|----------|--------|-----------|
