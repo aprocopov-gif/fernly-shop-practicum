@@ -17,7 +17,14 @@ One entry per issue, ordered by severity: money and privacy first, then broken f
 
 ## Findings
 
-None yet — map first; a suspicion becomes a finding only when a test (or exact reproduced steps) proves it.
+### F-01. Quantity stepper's + button stays enabled at the stock limit
+
+- **Where:** `QuantityStepper` component (`web/src/components/QuantityStepper.tsx`), used on the plant page and in cart lines
+- **Category:** Components
+- **Impact:** A customer can raise the quantity one above the stock left, asking for a plant the shop doesn't have.
+- **Evidence:** `web/cypress/component/QuantityStepper.cy.tsx`, test "disables + at the stock limit", fails under `npm run cy:component` (executed). Mounted with `value={3}` and `max={3}`; **Increase quantity** stays enabled. Screenshot: `web/cypress/screenshots/QuantityStepper.cy.tsx/QuantityStepper -- disables + at the stock limit (failed).png`. Code: `disabled={disabled || value > max}` instead of `value >= max`.
+- **Contradicts:** `docs/PRODUCT.md`: "**Quantity** starts at 1 and can never go above the stock left: at the stock limit, the **+** button is disabled."
+- **Suggested fix:** Disable + when `value >= max` instead of `value > max`.
 
 ## Suspicions — not yet tested
 
@@ -26,7 +33,6 @@ Things that look different from `docs/PRODUCT.md` (or the API contract), from re
 - **Plant page after a "Likes the same light" link** (Caching) — seen: address bar `/plants/pl-fiddle` while the page still showed Bird of Paradise at $50 / 5 in stock; code: `usePlant` caches under `['plant']` without `plantId`. *May contradict:* "The plant page always shows the plant in the address bar, including after following a "Likes the same light" link."
 - **Prices drop trailing zeros** (Components) — seen: browse showed `$22`, `$27.5`, `$12.5`, `$49`; cart/checkout showed `$12.5` and `Add $37.5 more for free shipping.`; code: `formatPrice` returns `` `$${Math.round(amount * 100) / 100}` `` with no `toFixed(2)`. *May contradict:* "Every price is shown in dollars with **two decimals**, everywhere: `$12.50`, never `$12.5`."
 - **`CareLevelBadge` for level 3** (Components) — seen: Fiddle Leaf Fig, Calathea Orbifolia, and String of Pearls cards say "Moderate care"; code: `LABELS[Math.min(level, LABELS.length - 1) - 1]` caps the index at Moderate. *May contradict:* "Care level has three steps: 1 **Easy**, 2 **Moderate**, 3 **Expert**." and OpenAPI `careLevel` "1 Easy, 2 Moderate, 3 Expert."
-- **Quantity stepper's + at the stock limit** (Components) — code: `disabled={disabled || value > max}` leaves + enabled when `value === max`. *May contradict:* "at the stock limit, the **+** button is disabled."
 - **Catalog load failure looks empty** (Pages) — code: Browse treats `plants.isError` the same as no items (`EmptyState` "No plants match your filters", no Try again). *May contradict:* "If the catalog can't be loaded, the page says so and offers **Try again**. It never pretends there are no plants."
 - **Price: high to low sorts cheapest first** (Business rules in the API) — seen via API: `GET /api/plants?sort=price-desc` first item Succulent Cutting at $0.99; code: `price-desc` shares the ascending comparator with `price-asc`. *May contradict:* "**Price: high to low (most expensive first)**." OpenAPI: `price-desc (highest first)`.
 - **Plant detail `rating` is a string** (The contract) — code/API: `getPlant` sets `rating: plant.rating.toFixed(1)` (e.g. `"4.1"`). *May contradict:* OpenAPI `Plant` / `PlantSummary`: `rating` is a number.
