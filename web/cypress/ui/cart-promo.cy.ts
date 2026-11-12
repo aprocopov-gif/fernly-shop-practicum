@@ -95,7 +95,7 @@ function expectVisiblePromoLabelNamesField() {
 }
 
 describe('Cart page promo', () => {
-  it('U1-01 shows the promo field under the summary and applies leafy10', { tags: '@ui' }, () => {
+  it('U1-01 shows the promo field under the summary and applies leafy10', { tags: ['@ui', '@known-bug'] }, () => {
     openCart('promo/cart-pothos.json');
     cy.intercept('POST', '/api/cart/promo', { fixture: 'promo/cart-pothos-leafy10.json' }).as('applyPromo');
 
@@ -109,7 +109,7 @@ describe('Cart page promo', () => {
     expectLeafy10Summary();
   });
 
-  it('U1-02 removes the promo code and restores the empty field', { tags: '@ui' }, () => {
+  it('U1-02 removes the promo code and restores the empty field', { tags: ['@ui', '@known-bug'] }, () => {
     openCart('promo/cart-pothos-leafy10.json');
     cy.intercept('DELETE', '/api/cart/promo', { fixture: 'promo/cart-pothos.json' }).as('removePromo');
 
@@ -146,7 +146,7 @@ describe('Cart page promo', () => {
     cy.findByRole('button', { name: 'Apply' }).should('not.exist');
   });
 
-  it('U1-05 announces an expired code and keeps the total', { tags: '@ui' }, () => {
+  it('U1-05 announces an expired code and keeps the total', { tags: ['@ui', '@known-bug'] }, () => {
     openCart('promo/cart-pothos.json');
     cy.intercept('POST', '/api/cart/promo', {
       statusCode: 400,
@@ -175,7 +175,7 @@ describe('Cart page promo', () => {
     cy.findByRole('button', { name: 'Apply' }).should('not.exist');
   });
 
-  it('U1-07 disables Apply while the promo request is in flight', { tags: '@ui' }, () => {
+  it('U1-07 disables Apply while the promo request is in flight', { tags: ['@ui', '@known-bug'] }, () => {
     openCart('promo/cart-pothos.json');
     cy.intercept('POST', '/api/cart/promo', {
       delay: 1000,
@@ -194,7 +194,7 @@ describe('Cart page promo', () => {
     });
   });
 
-  it('U1-08 replaces LEAFY10 with FREESHIP without Remove', { tags: '@ui' }, () => {
+  it('U1-08 replaces LEAFY10 with FREESHIP without Remove', { tags: ['@ui', '@known-bug'] }, () => {
     openCart('promo/cart-pothos.json');
     let applyCount = 0;
     cy.intercept('POST', '/api/cart/promo', (req) => {
@@ -225,7 +225,7 @@ describe('Cart page promo', () => {
     });
   });
 
-  it('U1-09 names the promo field and applies it from the keyboard', { tags: '@ui' }, () => {
+  it('U1-09 names the promo field and applies it from the keyboard', { tags: ['@ui', '@known-bug'] }, () => {
     openCart('promo/cart-pothos.json');
     cy.intercept('POST', '/api/cart/promo', { fixture: 'promo/cart-pothos-leafy10.json' }).as('applyPromo');
 

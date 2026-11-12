@@ -45,7 +45,7 @@ describe('Browse page', () => {
     });
   });
 
-  it('shows $0.00 for a plant priced at 0', { tags: '@ui' }, () => {
+  it('shows $0.00 for a plant priced at 0', { tags: ['@ui', '@known-bug'] }, () => {
     openBrowse('plants/browse-zero-price.json');
 
     cy.findByRole('article').within(() => {
@@ -53,7 +53,7 @@ describe('Browse page', () => {
     });
   });
 
-  it('shows an error with Try again when the catalog cannot be loaded', { tags: '@ui' }, () => {
+  it('shows an error with Try again when the catalog cannot be loaded', { tags: ['@ui', '@known-bug'] }, () => {
     openBrowse('plants/browse-server-error.json', 500);
 
     cy.findByRole('alert').within(() => {

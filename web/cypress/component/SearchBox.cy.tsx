@@ -92,13 +92,13 @@ describe('SearchBox', () => {
     cy.get('@onSearch').should('not.have.been.called');
   });
 
-  it('SB-08 gives the search input an accessible name', { tags: '@component' }, () => {
+  it('SB-08 gives the search input an accessible name', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<SearchBox value="" onSearch={cy.spy()} />);
 
     cy.findByRole('searchbox', { name: /search plants/i });
   });
 
-  it('SB-09 shows a visible focus outline on the search input', { tags: '@component' }, () => {
+  it('SB-09 shows a visible focus outline on the search input', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<SearchBox value="" onSearch={cy.spy()} />);
 
     cy.press(Cypress.Keyboard.Keys.TAB);

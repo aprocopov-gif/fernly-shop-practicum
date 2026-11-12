@@ -50,7 +50,7 @@ function isDiscountAmount(content: string, element: Element | null): boolean {
 }
 
 describe('OrderSummary', () => {
-  it('C1-01 shows the LEAFY10 discount and the free-shipping hint under $50', { tags: '@component' }, () => {
+  it('C1-01 shows the LEAFY10 discount and the free-shipping hint under $50', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(
       <OrderSummary
         itemCount={1}
@@ -88,7 +88,7 @@ describe('OrderSummary', () => {
     });
   });
 
-  it('C1-03 keeps the free-shipping hint one dollar under $50', { tags: '@component' }, () => {
+  it('C1-03 keeps the free-shipping hint one dollar under $50', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(
       <OrderSummary
         itemCount={1}
@@ -126,7 +126,7 @@ describe('OrderSummary', () => {
     });
   });
 
-  it('C1-05 names the summary region with the Paid heading', { tags: '@component' }, () => {
+  it('C1-05 names the summary region with the Paid heading', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(
       <OrderSummary
         title="Paid"

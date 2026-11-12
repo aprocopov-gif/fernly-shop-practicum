@@ -165,7 +165,7 @@ describe('Orders page', () => {
     });
   });
 
-  it('OR-06 shows $0.00 for a zero-total order', { tags: '@ui' }, () => {
+  it('OR-06 shows $0.00 for a zero-total order', { tags: ['@ui', '@known-bug'] }, () => {
     openOrders('orders/zero-total.json');
 
     cy.findByRole('listitem').within(() => {

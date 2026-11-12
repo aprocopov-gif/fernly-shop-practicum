@@ -16,7 +16,7 @@ const basePlant: PlantSummary = {
 };
 
 describe('PlantCard', () => {
-  it('PC-01 shows name, Latin, Easy care, Pet safe, $12.50, rating, alt; no save', { tags: '@component' }, () => {
+  it('PC-01 shows name, Latin, Easy care, Pet safe, $12.50, rating, alt; no save', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<PlantCard plant={basePlant} />);
 
     cy.findByRole('article');
@@ -43,7 +43,7 @@ describe('PlantCard', () => {
     cy.findByText('Out of stock').should('not.exist');
   });
 
-  it('PC-04 shows Not pet safe and Expert care', { tags: '@component' }, () => {
+  it('PC-04 shows Not pet safe and Expert care', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<PlantCard plant={{ ...basePlant, petSafe: false, careLevel: 3 }} />);
 
     cy.findByText(/Not pet safe/);
@@ -89,7 +89,7 @@ describe('PlantCard', () => {
     cy.findByText('Plant detail for pl-pothos');
   });
 
-  it('PC-09 gives the save button an accessible name', { tags: '@component' }, () => {
+  it('PC-09 gives the save button an accessible name', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<PlantCard plant={basePlant} onToggleSave={cy.spy()} />);
 
     cy.findByRole('button', { name: /.+/ });
@@ -103,7 +103,7 @@ describe('PlantCard', () => {
     });
   });
 
-  it('PC-11 shows rating 5.0 and price $0.00', { tags: '@component' }, () => {
+  it('PC-11 shows rating 5.0 and price $0.00', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<PlantCard plant={{ ...basePlant, rating: 5, price: 0 }} />);
 
     cy.findByText(/5\.0/);

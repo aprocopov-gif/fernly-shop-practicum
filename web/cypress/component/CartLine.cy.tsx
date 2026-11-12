@@ -14,7 +14,7 @@ const defaultLine: CartLineData = {
 };
 
 describe('CartLine', () => {
-  it('CA-01 shows name, Size S meta, $12.50 each, $25.00 total, and decorative image', { tags: '@component' }, () => {
+  it('CA-01 shows name, Size S meta, $12.50 each, $25.00 total, and decorative image', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(
       <CartLine line={defaultLine} onQuantityChange={cy.spy()} onRemove={cy.spy()} />,
     );
@@ -77,7 +77,7 @@ describe('CartLine', () => {
     );
   });
 
-  it('CA-06 disables Increase when quantity equals stock', { tags: '@component' }, () => {
+  it('CA-06 disables Increase when quantity equals stock', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(
       <CartLine
         line={{ ...defaultLine, quantity: 5, stock: 5, lineTotal: 62.5 }}

@@ -87,7 +87,7 @@ function assertPlainOrderContent() {
 }
 
 describe('Order page', () => {
-  it('OD-01 shows a placed order with lines, ships-to, and Paid summary without Discount', { tags: '@ui' }, () => {
+  it('OD-01 shows a placed order with lines, ships-to, and Paid summary without Discount', { tags: ['@ui', '@known-bug'] }, () => {
     openOrder('ord-plain', 'orders/order-plain.json');
     assertPlainOrderContent();
   });
@@ -152,7 +152,7 @@ describe('Order page', () => {
     });
   });
 
-  it('OD-06 shows $0.00 for a zero-total order', { tags: '@ui' }, () => {
+  it('OD-06 shows $0.00 for a zero-total order', { tags: ['@ui', '@known-bug'] }, () => {
     openOrder('ord-zero', 'orders/order-zero-total.json');
 
     cy.findByRole('region', { name: 'Paid' }).within(() => {
@@ -173,7 +173,7 @@ describe('Order page', () => {
     cy.findByRole('heading', { name: 'Order ord-plain' });
   });
 
-  it('OD-08 shows the thank-you status when opened with ?placed=1', { tags: '@ui' }, () => {
+  it('OD-08 shows the thank-you status when opened with ?placed=1', { tags: ['@ui', '@known-bug'] }, () => {
     openOrder('ord-plain', 'orders/order-plain.json', { path: '/orders/ord-plain?placed=1' });
 
     cy.findByRole('status').within(() => {
@@ -208,7 +208,7 @@ describe('Order page', () => {
     cy.findByRole('heading', { name: 'No orders yet' });
   });
 
-  it('OD-11 exposes the order heading, Paid region, and line totals', { tags: '@ui' }, () => {
+  it('OD-11 exposes the order heading, Paid region, and line totals', { tags: ['@ui', '@known-bug'] }, () => {
     openOrder('ord-plain', 'orders/order-plain.json');
 
     cy.findByRole('heading', { name: 'Order ord-plain' });

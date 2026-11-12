@@ -51,7 +51,7 @@ function stubCartGet(fixture: string) {
 }
 
 describe('Plant page', () => {
-  it('PL-01 shows in-stock plant detail, sizes, quantity, and similar links', { tags: '@ui' }, () => {
+  it('PL-01 shows in-stock plant detail, sizes, quantity, and similar links', { tags: ['@ui', '@known-bug'] }, () => {
     openPlant('plants/plant-pothos.json');
     cy.wait('@plantNames');
 
@@ -138,7 +138,7 @@ describe('Plant page', () => {
     });
   });
 
-  it('PL-06 shows $0.00 for a zero-priced plant', { tags: '@ui' }, () => {
+  it('PL-06 shows $0.00 for a zero-priced plant', { tags: ['@ui', '@known-bug'] }, () => {
     openPlant('plants/plant-zero-price.json', { plantId: 'pl-cutting', path: '/plants/pl-cutting' });
 
     cy.findByText('$0.00');

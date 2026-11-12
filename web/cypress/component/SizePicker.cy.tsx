@@ -8,7 +8,7 @@ const SML: { label: SizeLabel; priceDelta: number }[] = [
 ];
 
 describe('SizePicker', () => {
-  it('SZ-01 shows Size legend, named radios, and base vs delta prices', { tags: '@component' }, () => {
+  it('SZ-01 shows Size legend, named radios, and base vs delta prices', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<SizePicker sizes={SML} value="S" onChange={cy.spy()} />);
 
     cy.findByRole('group', { name: 'Size' });
@@ -62,7 +62,7 @@ describe('SizePicker', () => {
     cy.findByText('Base price');
   });
 
-  it('SZ-06 shows +$0.50 for a half-dollar delta', { tags: '@component' }, () => {
+  it('SZ-06 shows +$0.50 for a half-dollar delta', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(
       <SizePicker sizes={[{ label: 'L', priceDelta: 0.5 }]} value="L" onChange={cy.spy()} />,
     );

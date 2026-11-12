@@ -45,7 +45,7 @@ describe('QuantityStepper', () => {
     );
   });
 
-  it('QS-06 disables Increase at the stock limit', { tags: '@component' }, () => {
+  it('QS-06 disables Increase at the stock limit', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<QuantityStepper value={3} max={3} onChange={cy.spy()} />);
 
     cy.findByRole('button', { name: 'Increase quantity' }).then(($el) =>
@@ -53,7 +53,7 @@ describe('QuantityStepper', () => {
     );
   });
 
-  it('QS-07 disables both buttons when min equals max', { tags: '@component' }, () => {
+  it('QS-07 disables both buttons when min equals max', { tags: ['@component', '@known-bug'] }, () => {
     cy.mount(<QuantityStepper value={1} max={1} onChange={cy.spy()} />);
 
     cy.findByRole('button', { name: 'Decrease quantity' }).then(($el) =>
