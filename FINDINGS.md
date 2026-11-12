@@ -74,62 +74,68 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
 - **Contradicts:** `docs/PRODUCT.md`: "Care level has three steps: 1 **Easy**, 2 **Moderate**, 3 **Expert**." OpenAPI `careLevel`: "1 Easy, 2 Moderate, 3 Expert."
 - **Suggested fix:** Index with `LABELS[level - 1]` (or equivalent) so level 3 maps to Expert.
 
-### F-05. PriceTag text contrast is below WCAG on the page background
+### F-05. Price text fails colour contrast (axe `color-contrast`)
 
-- **Where:** `PriceTag` (`web/src/components/PriceTag.module.css` colour `#8dbb8a`) on page background `#f6faf3`
+- **Where:** `PriceTag` (`web/src/components/PriceTag.module.css` colour `#8dbb8a`) — **pages:** Browse, Plant, Cart, Checkout, Order
 - **Category:** Accessibility
-- **Impact:** Price text can be hard to read for customers with low vision.
-- **Evidence:** `web/cypress/component/PriceTag.cy.tsx`, test "PT-16 meets contrast on page background for each size" (executed; tagged `@known-bug`). `sm` contrast measured **2.07:1** (expected ≥ 4.5:1; `lg` large-text floor ≥ 3:1).
+- **Impact:** Price text can be hard to read for customers with low vision (axe reports ~2.18:1 on white/card backgrounds; expected ≥ 4.5:1, or ≥ 3:1 for large text).
+- **Evidence:** Executed:
+  - Playwright a11y: `tests/a11y/pages.spec.ts` (Browse, Plant, Cart, Checkout) and promo a11y scans that hit Checkout/Order; report `a11y-report/` — axe rule `color-contrast` on PriceTag selectors. Cart occurrences are **baselined** in `tests/a11y/a11y-baseline.json` (owner design team, expires 2026-12-31, reason "new brand colors"); other pages remain blocking.
+  - `web/cypress/component/PriceTag.cy.tsx` — "PT-16 meets contrast on page background for each size" (tagged `@known-bug`); `sm` measured **2.07:1** on page background `#f6faf3`.
 - **Contradicts:** `docs/PRODUCT.md`: "text has enough contrast against its background (4.5:1 for normal text)"
 - **Suggested fix:** Darken the price colour (or background) until contrast meets 4.5:1 (3:1 if large text applies).
 
-### F-06. Plant card save button has no accessible name
+### F-06. Plant card save button has no accessible name (axe `button-name`)
 
-- **Where:** `PlantCard` heart control (`web/src/components/PlantCard.tsx`)
+- **Where:** `PlantCard` heart control (`web/src/components/PlantCard.tsx`) — **pages:** Browse
 - **Category:** Accessibility
 - **Impact:** Screen-reader users cannot tell what the save control does.
-- **Evidence:** `web/cypress/component/PlantCard.cy.tsx`, test "PC-09 gives the save button an accessible name" (executed; tagged `@known-bug`). Button has `aria-pressed` and accessible name `""` (icon-only SVG is `aria-hidden`). Also seen on Browse.
+- **Evidence:** Executed:
+  - Playwright a11y: `tests/a11y/pages.spec.ts` — Browse; axe rule `button-name` on `.PlantCard-module__save` (12 cards in the catalog scan); `a11y-report/`.
+  - `web/cypress/component/PlantCard.cy.tsx` — "PC-09 gives the save button an accessible name" (tagged `@known-bug`). Button has `aria-pressed` and accessible name `""` (icon-only SVG is `aria-hidden`).
 - **Contradicts:** `docs/PRODUCT.md`: "every button and form field has a name a screen reader can announce."
 - **Suggested fix:** Add a visible or visually-hidden name (e.g. "Save {plant name}") / `aria-label`.
 
-### F-07. Search box input has no accessible name
+### F-07. Form fields without labels (axe `label`)
 
-- **Where:** `SearchBox` (`web/src/components/SearchBox.tsx`)
+- **Where:** `SearchBox` on Browse; `PromoCodeInput` on Cart — **pages:** Browse, Cart
 - **Category:** Accessibility
-- **Impact:** Screen-reader users hear an unnamed search field.
-- **Evidence:** `web/cypress/component/SearchBox.cy.tsx`, test "SB-08 gives the search input an accessible name" (executed; tagged `@known-bug`). Visual hint **Search plants** is a `<span>`, not a label.
-- **Contradicts:** `docs/PRODUCT.md`: "every button and form field has a name a screen reader can announce."
-- **Suggested fix:** Associate a real `<label>` (or `aria-label`) with the search input.
+- **Impact:** Screen-reader users hear unnamed fields for catalog search and the promo code.
+- **Evidence:** Executed:
+  - Playwright a11y: `tests/a11y/pages.spec.ts` — Browse and Cart; axe rule `label` on `.SearchBox-module__input` (Browse) and the promo `<input>` (Cart); `a11y-report/`.
+  - `web/cypress/component/SearchBox.cy.tsx` — "SB-08 gives the search input an accessible name" (tagged `@known-bug`). Visual hint **Search plants** is a `<span>`, not a label.
+  - Promo (tagged `@known-bug`): `web/cypress/ui/cart-promo.cy.ts` (U1 rows requiring textbox name **Promo code**); `web/cypress/component/PromoCodeInput.cy.tsx` (e.g. C2-01, C2-02, C2-09, C2-12). UI shows **Have a promo code?** as a `<p>` and an unlabeled `<input>`.
+- **Contradicts:** `docs/PRODUCT.md`: "every button and form field has a name a screen reader can announce." Approved cart promo design (`web/cypress/test-design/CartPromo.md` U1-01 / U1-09): visible label **Promo code**.
+- **Suggested fix:** Associate a real `<label>` / `aria-label` with the search input; add a visible **Promo code** label on the promo field (keep Apply/Remove named).
 
 ### F-08. Search box focus outline is removed
 
-- **Where:** `SearchBox.module.css` (`.input { outline: none; }`)
+- **Where:** `SearchBox.module.css` (`.input { outline: none; }`) — **pages:** Browse
 - **Category:** Accessibility
 - **Impact:** Keyboard users cannot see which control is focused in the search field.
 - **Evidence:** `web/cypress/component/SearchBox.cy.tsx`, test "SB-09 shows a visible focus outline on the search input" (executed; tagged `@known-bug`). Computed `outlineStyle` is `none` with no replacement focus style.
 - **Contradicts:** `docs/PRODUCT.md`: "everything works with the keyboard alone, and focus is always visible."
 - **Suggested fix:** Restore a visible `:focus-visible` style (keep outline or an equivalent ring).
 
-### F-09. Promo code field has no accessible name / visible "Promo code" label
+### F-09. Promo error message is not announced as an alert
 
-- **Where:** `PromoCodeInput` (`web/src/components/PromoCodeInput.tsx`), Cart promo slot
-- **Category:** Accessibility
-- **Impact:** Screen-reader and keyboard users cannot identify the promo field by the name the product/design require.
-- **Evidence:** Executed (tagged `@known-bug`):
-  - `web/cypress/ui/cart-promo.cy.ts` — U1-01, U1-02, U1-05, U1-07, U1-08, U1-09 (and any other U1 row that requires `role="textbox"` name **Promo code**)
-  - `web/cypress/component/PromoCodeInput.cy.tsx` — rows that require visible/accessible name **Promo code** (e.g. C2-01, C2-02, C2-09, C2-12)
-  UI shows **Have a promo code?** as a `<p>` and an unlabeled `<input>`.
-- **Contradicts:** `docs/PRODUCT.md`: "every button and form field has a name a screen reader can announce." Approved cart promo design (`web/cypress/test-design/CartPromo.md` U1-01 / U1-09): visible label **Promo code**.
-- **Suggested fix:** Add a visible label **Promo code** associated with the input (and keep Apply/Remove named).
-
-### F-10. Promo error message is not announced as an alert
-
-- **Where:** `PromoCodeInput` error text (`web/src/components/PromoCodeInput.tsx`)
+- **Where:** `PromoCodeInput` error text (`web/src/components/PromoCodeInput.tsx`) — **pages:** Cart
 - **Category:** Accessibility
 - **Impact:** Screen-reader users may miss that a promo code was refused.
-- **Evidence:** `web/cypress/component/PromoCodeInput.cy.tsx`, test "C2-11 announces the expired message with contrast at least 4.5:1" (executed; tagged `@known-bug`). Error text is not inside `role="alert"` or `aria-live="assertive"`.
+- **Evidence:** Executed (tagged `@known-bug` / failing a11y):
+  - `web/cypress/component/PromoCodeInput.cy.tsx` — "C2-11 announces the expired message with contrast at least 4.5:1". Error text is not inside `role="alert"` or `aria-live="assertive"`.
+  - `tests/a11y/promo.spec.ts` — "X1 an expired-code refusal is in an alert…" (no alert with /expired/i).
 - **Contradicts:** Approved promo design / feature expectation that the error is announced when it appears; `docs/PRODUCT.md` WCAG AA aim for operable, understandable feedback on forms.
 - **Suggested fix:** Wrap the error in `role="alert"` (or an assertive live region); ensure contrast ≥ 4.5:1.
+
+### F-10. Plant hero image has no alternative text (axe `image-alt`)
+
+- **Where:** Plant detail hero `<img>` (`web/src/pages/PlantPage.tsx`) — **pages:** Plant
+- **Category:** Accessibility
+- **Impact:** Screen-reader users get no description of the plant photo.
+- **Evidence:** Executed: `tests/a11y/pages.spec.ts` — Plant; axe rule `image-alt` on `img` (no `alt` / accessible name); `a11y-report/`. Code: `<img src={data.imageUrl} className={styles.heroImage} />` with no `alt`.
+- **Contradicts:** `docs/PRODUCT.md`: "every meaningful image has alternative text."
+- **Suggested fix:** Set `alt` to the plant name (or an equivalent short description).
 
 ### F-11. Cart rejected quantity change does not show the API error toast
 
@@ -148,7 +154,6 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 - **Price: high to low sorts cheapest first** (Business rules in the API) — seen via API: `GET /api/plants?sort=price-desc` first item Succulent Cutting at $0.99; code: `price-desc` shares the ascending comparator with `price-asc`. *May contradict:* "**Price: high to low (most expensive first)**." OpenAPI: `price-desc (highest first)`.
 - **Plant detail `rating` is a string** (The contract) — code/API: `getPlant` sets `rating: plant.rating.toFixed(1)` (e.g. `"4.1"`). *May contradict:* OpenAPI `Plant` / `PlantSummary`: `rating` is a number.
 - **Free shipping at exactly $50.00** (Business rules in the API) — code: `subtotal > FREE_SHIPPING_FROM` (strict greater than 50), so Bird of Paradise at $50.00 still gets `$6.95` shipping. *May contradict:* "Shipping costs $6.95, and is free when the subtotal is $50.00 or more."
-- **Plant detail hero image has no `alt`** (Accessibility) — code: `<img src={data.imageUrl} className={styles.heroImage} />` with no `alt`. *May contradict:* "every meaningful image has alternative text." (PL-A1 was assumed — ask; no failing test yet.)
 - **Page titles** (Accessibility) — seen: every page has the title "Fernly — plants for every windowsill". *May contradict:* WCAG 2.4.2 Page Titled under the PRODUCT AA aim.
 - **Order page after signing out and in as another customer** (Caching / Authorization) — code: sign-out drops cached cart and order list but not `['order', id]`. *May contradict:* order privacy and "Signing out forgets the session on this device."
 - **Plant page quantity after a "Likes the same light" link** (Pages) — code: quantity and size state are not reset when `plantId` changes. *May contradict:* "**Quantity** starts at 1 …"
@@ -174,4 +179,4 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 - "Passwords have at least 8 characters; an email can have only one account."
 - Promo percentage vs shipping (OpenAPI / `docs/features/promo-codes.md`: never off shipping); expired codes (`SPRING5`).
 - Contract shape: every response field against the OpenAPI schemas, including two-decimal money values and numeric `rating` on plant detail.
-- Plant hero `alt`; page titles; order-cache after sign-out; plant quantity reset on similar-light navigation.
+- Page titles; order-cache after sign-out; plant quantity reset on similar-light navigation.
