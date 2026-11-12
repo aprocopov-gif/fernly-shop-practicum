@@ -6,42 +6,23 @@ paths: "docs/**"
 
 # Diff to test plan
 
-## Gather context
+1. Read the diff (`git diff` against the base branch, or `gh pr diff`) and the docs it touches (`docs/PRODUCT.md`, `docs/features/*.md`). Note the branch name for the output path.
 
-1. Read the change: `git diff` against the base branch, or `gh pr diff` for a pull request. Note the current branch name for the output filename.
-2. Read the docs the change touches or that govern the behavior: `docs/PRODUCT.md`, `docs/features/*.md`, and `docs/APP-MAP.md` when UI or routes change.
+2. Path map — send each changed area to the right level and specialist:
 
-## Path map
+   - `web/src/components/**` → Cypress component tests (`component-test-design`, then `cypress-test-writer`);
+   - `web/src/pages/**` and `web/src/slots/**` → Cypress UI tests with a mocked API, plus Playwright e2e, plus an axe scan of that page;
+   - `web/src/api/**` → Playwright e2e (caching and data flow);
+   - `api/src/**` → Playwright API tests with schema checks;
+   - `api/src/schemas.ts` or new OpenAPI paths → schema checks on every affected response;
+   - anything else in `package.json` or config → the full suite.
 
-Route each changed path to test level and specialist:
+3. The plan: a short summary of the change, then one table:
 
-| Changed paths | Level | Specialist |
-|---------------|-------|------------|
-| `web/src/components/**` | Cypress component | `component-test-design` skill, then `cypress-test-writer` subagent |
-| `web/src/pages/**`, `web/src/slots/**` | Cypress UI (mocked API), Playwright e2e, axe on that page | `component-test-design` / `cypress-test-writer` for UI; e2e and a11y per row below |
-| `web/src/api/**` | Playwright e2e | Agent (caching and data flow) |
-| `api/src/**` | Playwright API | Agent with `.cursor/rules/api-testing.mdc` |
-| `api/src/schemas.ts` or new OpenAPI paths | Schema on every affected response | Agent with `expectSchema` per api-testing rule |
-| Anything else in `package.json` or config | Full suite | Note in plan; run existing CI matrix |
+   | ID | area | what changed | risk to a customer | level | specialist | cases (positive / negative / edge / accessibility) | source (the doc line) |
 
-## Write the plan
+   Money, privacy and sign-in rows first.
 
-Save to `docs/test-plans/<branch>.md`.
+4. What no document says: "assumed — ask".
 
-Structure:
-
-1. **Summary** — one short paragraph of what changed and why it matters to customers.
-2. **Table** — one row per testable area:
-
-| ID | area | what changed | risk to a customer | level | specialist | cases (positive / negative / edge / accessibility) | source |
-
-Rules:
-
-- Sort rows with money, privacy, and sign-in first.
-- **cases** column: list concrete scenarios per category where they apply; use "—" when a category does not apply.
-- **source**: cite the doc line (e.g. `PRODUCT.md` quote or section); if nothing in docs covers the behavior, write `assumed — ask` and do not invent an expected result.
-- **specialist**: `component-test-design` → `cypress-test-writer`, `change-triage` (agent), or `cypress-test-writer` as appropriate from the path map.
-
-## Stop
-
-Show the plan in chat. Do not write test code. Wait for human **approved** or edits before any specialist runs tests.
+5. Write `docs/test-plans/<branch>.md`. Stop for approval. Write no tests.
