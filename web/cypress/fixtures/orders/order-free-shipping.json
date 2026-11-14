@@ -1,0 +1,28 @@
+{
+  "id": "ord-free-ship",
+  "status": "placed",
+  "createdAt": "2026-11-05T15:00:00.000Z",
+  "lines": [
+    {
+      "id": "ln-free-1",
+      "plantId": "pl-bird",
+      "name": "Bird of Paradise",
+      "size": "M",
+      "unitPrice": 50,
+      "quantity": 1,
+      "lineTotal": 50,
+      "imageUrl": "/plants/bird.svg"
+    }
+  ],
+  "subtotal": 50,
+  "discount": 0,
+  "promoCode": null,
+  "shipping": 0,
+  "total": 50,
+  "shippingAddress": {
+    "fullName": "Ava Green",
+    "address": "1 Fern Lane",
+    "city": "Portland",
+    "postalCode": "97201"
+  }
+}

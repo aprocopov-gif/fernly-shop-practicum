@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/guard-baselines.sh",
+        "failClosed": true
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/guard-test-assertions.sh",
+        "failClosed": true
+      },
+      {
+        "command": ".cursor/hooks/guard-constitution.sh",
+        "failClosed": true
+      }
+    ]
+  }
+}

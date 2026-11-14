@@ -1,0 +1,17 @@
+{
+  "id": "pl-cutting",
+  "name": "Succulent Cutting",
+  "latinName": "Crassula ovata",
+  "price": 0,
+  "light": "bright",
+  "careLevel": 1,
+  "petSafe": true,
+  "stock": 14,
+  "rating": 4.2,
+  "imageUrl": "/plants/succulent.svg",
+  "description": "A free starter cutting for your windowsill.",
+  "sizes": [
+    { "label": "S", "priceDelta": 0 }
+  ],
+  "similar": []
+}
