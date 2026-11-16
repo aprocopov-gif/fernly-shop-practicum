@@ -217,6 +217,46 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
 - **Contradicts:** OpenAPI `Plant` / `PlantSummary`: `rating` is a number.
 - **Suggested fix:** Return `rating` as a number (do not `toFixed` into a string on the wire).
 
+### F-19. Review average for 5, 4, 5 shows 4.6 instead of 4.7
+
+- **Where:** `GET /api/plants/{plantId}/reviews` average (and the plant page Reviews summary)
+- **Category:** Business rules in the API
+- **Impact:** Seeded Snake Plant reviews (5+4+5) show average **4.6** instead of the documented halves-up **4.7**.
+- **Evidence:** Executed: `tests/api/plant-reviews.spec.ts` — "M1 GET pl-snake reviews returns average 4.7…"; `tests/e2e/plant-reviews.spec.ts` — "E1 signed-out pl-snake shows Reviews average…". API/UI both return/show `4.6`.
+- **Contradicts:** `docs/features/plant-reviews.md`: “The average is rounded to one decimal, halves up… 5, 4 and 5… **4.7**.”
+- **Suggested fix:** Round halves away from zero / up at one decimal (not banker's / truncating to 4.6).
+
+### F-20. Any signed-in customer can delete any review
+
+- **Where:** `DELETE /api/reviews/{reviewId}`
+- **Category:** Authorization
+- **Impact:** Ava can delete Ben’s review and a guest seed review (HTTP `204`) instead of `404` “Review not found”, so authorship/privacy for deletes is broken.
+- **Evidence:** Executed: `tests/api/plant-reviews.spec.ts` — "P1 Ava cannot delete Ben’s review or a guest review" — Ava `DELETE` on Ben’s review and on `rv-seed-1` each returned `204`; those ids disappeared from the next GET.
+- **Contradicts:** `docs/features/plant-reviews.md`: “Only the author can delete a review. Anyone else gets ‘Review not found’.” OpenAPI DELETE: author-only; others 404.
+- **Suggested fix:** Authorize delete by review author (guest/`userId` null never deletable by a customer); return 404 with detail “Review not found” and no `rule`.
+
+### F-21. Star rating radios lack `aria-checked` and keyboard support
+
+- **Where:** `StarRatingInput` (`web/src/components/StarRatingInput.tsx`) — plant page Write a review
+- **Category:** Accessibility
+- **Impact:** Keyboard and screen-reader users cannot set or hear the selected star rating, so they cannot review.
+- **Evidence:** Executed:
+  - `web/cypress/component/StarRatingInput.cy.tsx` — C3-02, C3-04, C3-05 (no `aria-checked`; Tab does not focus stars; no arrow-key behaviour)
+  - `web/cypress/ui/plant-reviews.cy.ts` — U1-08 (`tabIndex` −1 on star radios)
+  - `tests/e2e/plant-reviews.spec.ts` — E1 star group keyboard focus
+  - `tests/a11y/plant-reviews.spec.ts` — X1 write-form / post / validation scans: new blocking axe `aria-required-attr` on each star `role="radio"`
+- **Contradicts:** `docs/features/plant-reviews.md`: “Tab moves into it, the arrow keys change the rating, and a screen reader announces which star is selected.” `docs/PRODUCT.md` keyboard-only and named controls.
+- **Suggested fix:** Real radio-group behaviour: `aria-checked`, roving `tabIndex`, arrow keys, visible focus.
+
+### F-22. Reviews list does not refresh after a successful post
+
+- **Where:** Plant page reviews slot (`web/src/slots/plant-page/reviews.tsx`)
+- **Category:** Caching
+- **Impact:** After posting, the thanks toast appears but the list/average stay stale until a full reload.
+- **Evidence:** Executed: `web/cypress/ui/plant-reviews.cy.ts` U1-02 (no second `GET …/reviews` after POST); `tests/e2e/plant-reviews.spec.ts` — “E1 Ava posts on pl-fiddle…” (thanks visible; average/text of the new review not on the page without reload). Inspected: invalidate key `['review', plant.id]` vs query key `['reviews', plant.id]`.
+- **Contradicts:** `docs/features/plant-reviews.md`: “After posting, the review appears in the list right away.”
+- **Suggested fix:** Invalidate `['reviews', plantId]` (match the query key).
+
 ## Suspicions — not yet tested
 
 Things that look different from `docs/PRODUCT.md` (or the API contract) but do not yet have a failing Fernly test proving them. "Seen" means it showed up once on the walk; "code" means it comes from reading the source only.
@@ -235,6 +275,7 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 - Should the checkout accept fields that are only spaces? The form has `noValidate`, and the contract only asks for `minLength`.
 - Should a signed-in customer who opens `/login` or `/register` be redirected? The form shows again.
 - Promo plan rows **Q1–Q4** (`docs/test-plans/feature/promo-codes.md`): spaces around a code; a discount with no code; free-shipping hint while `FREESHIP` is applied under $50; what happens to the code after the last plant is removed. Neither `PRODUCT.md` nor `docs/features/promo-codes.md` answers these — no tests written.
+- Plant-reviews plan rows **Q1–Q5** (`docs/test-plans/feature/plant-reviews.md`): exact empty-state sentence; exact thanks toast wording; whether the plant page exposes a delete control; exact `already_reviewed` / author-mismatch `detail` beyond “Review not found”; whether the UI hides **Write a review** after the customer already reviewed. No tests written (`assumed — ask`).
 - Does the Orders list UI re-sort if the fixture/API array is oldest-first, or must the payload already be newest-first? (OR-A2)
 
 ## Rules to prove next
