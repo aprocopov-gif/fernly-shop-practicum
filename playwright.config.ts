@@ -28,7 +28,9 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       animations: 'disabled',
+      // No soft tolerance — even one differing pixel fails (default threshold would hide small defects).
       maxDiffPixels: 0,
+      threshold: 0,
     },
   },
   reporter: [
