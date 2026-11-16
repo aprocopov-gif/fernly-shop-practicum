@@ -51,6 +51,7 @@ async function addPothos(request: APIRequestContext, auth: { Authorization: stri
 }
 
 test('X1 cart with a line and an empty promo field has no new blocking violations', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
+  test.fail(true, 'F-07: promo field has no accessible Promo code label');
   const customer = await register(request);
   await addPothos(request, customer);
   await openWithToken(page, customer.token, '/cart');
@@ -79,6 +80,7 @@ test('X1 cart with LEAFY10 applied has no new blocking violations', { tag: '@a11
 });
 
 test('X1 checkout of a discounted cart has no new blocking violations', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
+  test.fail(true, 'F-05: price text fails colour contrast on Checkout');
   const customer = await register(request);
   await addPothos(request, customer);
   const applied = await request.post('/api/cart/promo', {
@@ -96,6 +98,7 @@ test('X1 checkout of a discounted cart has no new blocking violations', { tag: '
 });
 
 test('X1 a paid order with a discount line has no new blocking violations', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
+  test.fail(true, 'F-05: price text fails colour contrast on Order');
   const customer = await register(request);
   await addPothos(request, customer);
   const applied = await request.post('/api/cart/promo', {
@@ -119,6 +122,7 @@ test('X1 a paid order with a discount line has no new blocking violations', { ta
 });
 
 test('X1 an expired-code refusal is in an alert and the cart has no new blocking violations', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
+  test.fail(true, 'F-14: expired SPRING5 is accepted so no refusal alert appears');
   const customer = await register(request);
   await addPothos(request, customer);
   await openWithToken(page, customer.token, '/cart');

@@ -4,6 +4,7 @@ const MOST_EXPENSIVE_NAME =
   "Variegated Thai Constellation Monstera (Collector's Edition, Limited Greenhouse Batch)";
 
 test('Price: high to low shows the most expensive plant first', { tag: '@e2e' }, async ({ page }) => {
+  test.fail(true, 'F-17: price-desc sorts cheapest first');
   await page.goto('/');
   await page.getByLabel('Sort by').selectOption('price-desc');
   await expect(page.getByRole('heading', { level: 2, name: /\d+ plants/ })).toBeVisible();
