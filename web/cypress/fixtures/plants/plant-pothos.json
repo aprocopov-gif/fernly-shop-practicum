@@ -1,0 +1,19 @@
+{
+  "id": "pl-pothos",
+  "name": "Pothos 'Golden'",
+  "latinName": "Epipremnum aureum",
+  "price": 12.5,
+  "light": "low",
+  "careLevel": 1,
+  "petSafe": false,
+  "stock": 30,
+  "rating": 4.5,
+  "imageUrl": "/plants/trailing.svg",
+  "description": "Trailing vines with gold-flecked leaves. Perfect for shelves and hanging pots.",
+  "sizes": [
+    { "label": "S", "priceDelta": 0 },
+    { "label": "M", "priceDelta": 6 },
+    { "label": "L", "priceDelta": 12 }
+  ],
+  "similar": ["pl-snake", "pl-zz", "pl-parlor"]
+}
