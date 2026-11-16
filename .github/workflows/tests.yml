@@ -44,6 +44,7 @@ jobs:
         with:
           name: cypress-results
           path: web/cypress/results
+          retention-days: 30
           if-no-files-found: ignore
 
       - name: Upload Cypress screenshots
@@ -52,6 +53,7 @@ jobs:
         with:
           name: cypress-screenshots
           path: web/cypress/screenshots
+          retention-days: 30
           if-no-files-found: ignore
 
   playwright:
@@ -91,9 +93,10 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+  # push / workflow_dispatch: build qa-report artifact only; PR comments on pull_request
   report:
     needs: [cypress, playwright]
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     concurrency:
       group: qa-report
@@ -127,15 +130,17 @@ jobs:
           path: a11y-report
 
       - name: Build QA report
+        id: qa_build
         env:
-          BASE_REF: ${{ github.base_ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.base_ref || 'init' }}
+          PR_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || '' }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           GITHUB_RUN_ID: ${{ github.run_id }}
         run: node scripts/qa-report.mjs build
 
       - name: Publish QA report
+        if: github.event_name == 'pull_request'
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -143,7 +148,7 @@ jobs:
         run: node scripts/qa-report.mjs publish
 
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.qa_build.outcome == 'success' }}
         with:
           name: qa-report
           path: qa-report
