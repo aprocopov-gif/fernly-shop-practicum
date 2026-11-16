@@ -23,12 +23,14 @@ export class CheckoutPage {
     this.placeOrderButton = page.getByRole('button', { name: 'Place order' });
   }
 
+  /** Order summary region on checkout. */
   orderSummary(title = 'Order summary'): Locator {
     return this.page.getByRole('region', { name: title });
   }
 
   /**
    * Fills shipping fields on the checkout form.
+   * @param address Shipping address fields.
    * @returns This checkout page.
    */
   async fillShipping(address: ShippingAddress): Promise<CheckoutPage> {

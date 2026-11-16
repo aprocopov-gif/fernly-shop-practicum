@@ -16,7 +16,7 @@ test('catalog first screen', { tag: '@visual' }, async ({ page }) => {
   await browse.open();
   await expect(browse.plantsCountHeading).toBeVisible();
   await expect(browse.firstPlantCard).toBeVisible();
-  await expect(browse.firstPlantCard.getByRole('img')).toBeVisible();
+  await expect(browse.firstPlantCardImage).toBeVisible();
 
   await expect(page).toHaveScreenshot('catalog-first-screen.png');
 });
@@ -27,7 +27,7 @@ test('Monstera Deliciosa card (in stock)', { tag: '@visual' }, async ({ page }) 
 
   await browse.open();
   await expect(card).toBeVisible();
-  await expect(card.getByRole('img')).toBeVisible();
+  await expect(browse.plantCardImage('Monstera Deliciosa')).toBeVisible();
 
   await expect(card).toHaveScreenshot('monstera-deliciosa-card.png');
 });
@@ -40,7 +40,7 @@ test('Hoya Carnosa card (low stock)', { tag: '@visual' }, async ({ page }) => {
   await browse.searchPlants('Hoya Carnosa');
   await expect(browse.plantsCountHeading).toHaveText('1 plants');
   await expect(card).toBeVisible();
-  await expect(card.getByRole('img')).toBeVisible();
+  await expect(browse.plantCardImage('Hoya Carnosa')).toBeVisible();
 
   await expect(card).toHaveScreenshot('hoya-carnosa-card.png');
 });

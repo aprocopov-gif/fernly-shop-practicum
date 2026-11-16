@@ -24,7 +24,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-async function signIn(page: Page, request: APIRequestContext): Promise<void> {
+async function signIn(page: Page, request: APIRequestContext): Promise<LoginPage> {
   const email = `e2e-${crypto.randomUUID()}@fernly.test`;
   const registered = await request.post('/api/auth/register', {
     data: { name: 'Eden Fern', email, password: PASSWORD },
@@ -34,7 +34,8 @@ async function signIn(page: Page, request: APIRequestContext): Promise<void> {
   const login = new LoginPage(page);
   await login.open();
   await login.signInWith(email, PASSWORD);
-  await expect(page.getByText('Hi, Eden')).toBeVisible();
+  await expect(login.signedInGreeting('Eden')).toBeVisible();
+  return login;
 }
 
 async function addSmallPothosToCart(page: Page): Promise<CartPage> {
@@ -121,7 +122,7 @@ test('E1 an unknown code is refused and the cart total stays', { tag: '@e2e' }, 
   await expect(cartSummary.getByText('$19.45')).toBeVisible();
   await expect(cartSummary.getByText('$6.95')).toBeVisible();
   await expect(cartSummary.getByText(/Discount/)).toHaveCount(0);
-  await expect(page.getByText('NO-SUCH-CODE', { exact: false })).toHaveCount(0);
+  await expect(cart.textMentioning('NO-SUCH-CODE')).toHaveCount(0);
 });
 
 test('E1 FREESHIP replaces LEAFY10 and Remove restores paid shipping', { tag: '@e2e' }, async ({ page, request }) => {
@@ -158,7 +159,7 @@ test('E1 the promo field has a visible Promo code label and Apply and Remove are
   await expect(cart.promoCodeLabel).toBeVisible();
 
   await cart.promoCodeLabeledField.focus();
-  await page.keyboard.press('Tab');
+  await cart.pressTab();
   await expect(cart.applyPromoButton).toBeFocused();
 
   const token = await page.evaluate(() => localStorage.getItem('fernly_token'));
@@ -171,7 +172,7 @@ test('E1 the promo field has a visible Promo code label and Apply and Remove are
   const body: unknown = await applied.json();
   if (!isRecord(body)) throw new Error('POST /api/cart/promo did not return an object');
 
-  await page.reload();
+  await cart.reload();
   await cart.removePromoButton.focus();
   await expect(cart.removePromoButton).toBeFocused();
 });

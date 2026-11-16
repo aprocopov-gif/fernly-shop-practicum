@@ -11,6 +11,11 @@ export class LoginPage {
     this.signInButton = page.getByRole('button', { name: 'Sign in' });
   }
 
+  /** Header greeting after sign-in (e.g. “Hi, Eden”). */
+  signedInGreeting(firstName: string): Locator {
+    return this.page.getByText(`Hi, ${firstName}`);
+  }
+
   /**
    * Opens the sign-in form.
    * @returns This login page.
@@ -22,6 +27,8 @@ export class LoginPage {
 
   /**
    * Submits email and password.
+   * @param email Customer email.
+   * @param password Customer password.
    * @returns This login page.
    */
   async signInWith(email: string, password: string): Promise<LoginPage> {
