@@ -44,6 +44,7 @@ jobs:
         with:
           name: cypress-results
           path: web/cypress/results
+          retention-days: 30
           if-no-files-found: ignore
 
       - name: Upload Cypress screenshots
@@ -52,6 +53,7 @@ jobs:
         with:
           name: cypress-screenshots
           path: web/cypress/screenshots
+          retention-days: 30
           if-no-files-found: ignore
 
   playwright:
@@ -128,6 +130,7 @@ jobs:
           path: a11y-report
 
       - name: Build QA report
+        id: qa_build
         env:
           BASE_REF: ${{ github.event_name == 'pull_request' && github.base_ref || 'init' }}
           PR_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || '' }}
@@ -145,7 +148,7 @@ jobs:
         run: node scripts/qa-report.mjs publish
 
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.qa_build.outcome == 'success' }}
         with:
           name: qa-report
           path: qa-report

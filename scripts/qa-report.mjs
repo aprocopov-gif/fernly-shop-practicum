@@ -556,6 +556,49 @@ function ghSpawn(args, options = {}) {
   });
 }
 
+function ghDisabledIssues(result) {
+  const text = `${result?.stderr ?? ''}${result?.stdout ?? ''}`.toLowerCase();
+  return text.includes('disabled issues');
+}
+
+/** @returns {{ keys: Set<string>, issuesEnabled: boolean }} */
+function loadExistingFindingKeys(repo, dryRun) {
+  const listArgs = [
+    'issue',
+    'list',
+    '--repo',
+    repo,
+    '--label',
+    'qa-finding',
+    '--state',
+    'all',
+    '--json',
+    'body',
+    '--limit',
+    '500',
+  ];
+  if (dryRun) {
+    console.log('[dry-run] gh', listArgs.join(' '));
+    return { keys: new Set(), issuesEnabled: true };
+  }
+  const listed = ghSpawn(listArgs, { stdio: 'pipe' });
+  if (listed.status !== 0) {
+    if (ghDisabledIssues(listed)) {
+      console.log('Issues disabled on repo — skipping qa-finding dedupe.');
+      return { keys: new Set(), issuesEnabled: false };
+    }
+    process.exit(listed.status ?? 1);
+  }
+  const existingKeys = new Set();
+  for (const row of JSON.parse(listed.stdout || '[]')) {
+    const keyMatch = row.body?.match(
+      new RegExp(`${FINDING_KEY_MARKER}\\s+([\\w-]+)\\s*-->`),
+    );
+    if (keyMatch) existingKeys.add(keyMatch[1]);
+  }
+  return { keys: existingKeys, issuesEnabled: true };
+}
+
 function publishCommand(args) {
   const dryRun = args.includes('--dry-run');
   const repo = env('GITHUB_REPOSITORY');
@@ -580,36 +623,10 @@ function publishCommand(args) {
     ? JSON.parse(readFileSync(issuesPath, 'utf8'))
     : [];
 
-  const listArgs = [
-    'issue',
-    'list',
-    '--repo',
+  const { keys: existingKeys, issuesEnabled } = loadExistingFindingKeys(
     repo,
-    '--label',
-    'qa-finding',
-    '--state',
-    'all',
-    '--json',
-    'body',
-    '--limit',
-    '500',
-  ];
-  if (dryRun) {
-    console.log('[dry-run] gh', listArgs.join(' '));
-  }
-  const listed = dryRun
-    ? { stdout: '[]' }
-    : ghSpawn(listArgs, { stdio: 'pipe' });
-  if (!dryRun && listed.status !== 0) {
-    process.exit(listed.status ?? 1);
-  }
-  const existingKeys = new Set();
-  for (const row of JSON.parse(listed.stdout || '[]')) {
-    const keyMatch = row.body?.match(
-      new RegExp(`${FINDING_KEY_MARKER}\\s+([\\w-]+)\\s*-->`),
-    );
-    if (keyMatch) existingKeys.add(keyMatch[1]);
-  }
+    dryRun,
+  );
 
   const viewArgs = ['pr', 'view', pr, '--repo', repo, '--json', 'comments'];
   const viewed = dryRun
@@ -656,6 +673,15 @@ function publishCommand(args) {
     }
   }
 
+  if (!issues.length) return;
+
+  if (!issuesEnabled) {
+    console.log(
+      `Issues disabled — skipping ${issues.length} qa-finding issue(s); PR comment was still published.`,
+    );
+    return;
+  }
+
   for (const issue of issues) {
     if (existingKeys.has(issue.key)) continue;
     const bodyFile = path.join(PATHS.outDir, `issue-${issue.key}.md`);
@@ -676,7 +702,15 @@ function publishCommand(args) {
       console.log('[dry-run] gh', createIssueArgs.join(' '));
     } else {
       const r = ghSpawn(createIssueArgs);
-      if (r.status !== 0) process.exit(r.status ?? 1);
+      if (r.status !== 0) {
+        if (ghDisabledIssues(r)) {
+          console.log(
+            'Issues disabled — skipping remaining qa-finding issues.',
+          );
+          return;
+        }
+        process.exit(r.status ?? 1);
+      }
     }
   }
 }
