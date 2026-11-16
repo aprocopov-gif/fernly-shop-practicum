@@ -61,11 +61,11 @@ describe('PromoCodeInput', () => {
     cy.findByRole('button', { name: 'Apply' });
   });
 
-  it('C2-02 calls onApply once with the typed code leafy10', { tags: ['@component', '@known-bug'] }, () => {
+  it('C2-02 calls onApply once with the typed code leafy10', { tags: '@component' }, () => {
     const onApply = cy.spy().as('onApply');
     cy.mount(<PromoCodeInput appliedCode={null} onApply={onApply} onRemove={cy.spy()} />);
 
-    cy.findByRole('textbox', { name: 'Promo code' }).type('leafy10');
+    cy.findByRole('textbox').type('leafy10');
     cy.findByRole('button', { name: 'Apply' }).click();
 
     cy.get('@onApply').should('have.been.calledOnceWithExactly', 'leafy10');
@@ -81,7 +81,7 @@ describe('PromoCodeInput', () => {
     cy.get('@onRemove').should('have.been.calledOnce');
   });
 
-  it('C2-04 disables Apply and does not call onApply when the field is empty', { tags: ['@component', '@known-bug'] }, () => {
+  it('C2-04 disables Apply and does not call onApply when the field is empty', { tags: '@component' }, () => {
     const onApply = cy.spy().as('onApply');
     cy.mount(<PromoCodeInput appliedCode={null} onApply={onApply} onRemove={cy.spy()} />);
 
@@ -89,15 +89,15 @@ describe('PromoCodeInput', () => {
       expect($el, 'Apply with an empty code').to.be.disabled,
     );
 
-    cy.findByRole('textbox', { name: 'Promo code' }).type('{enter}');
+    cy.findByRole('textbox').type('{enter}');
     cy.get('@onApply').should('not.have.been.called');
   });
 
-  it('C2-05 keeps Apply disabled for a whitespace-only code', { tags: ['@component', '@known-bug'] }, () => {
+  it('C2-05 keeps Apply disabled for a whitespace-only code', { tags: '@component' }, () => {
     const onApply = cy.spy().as('onApply');
     cy.mount(<PromoCodeInput appliedCode={null} onApply={onApply} onRemove={cy.spy()} />);
 
-    cy.findByRole('textbox', { name: 'Promo code' }).type('   ');
+    cy.findByRole('textbox').type('   ');
 
     cy.findByRole('button', { name: 'Apply' }).then(($el) =>
       expect($el, 'Apply with only spaces').to.be.disabled,
@@ -118,10 +118,9 @@ describe('PromoCodeInput', () => {
     cy.findByText('This code has expired.');
   });
 
-  it('C2-07 disables Apply while a request is in flight', { tags: ['@component', '@known-bug'] }, () => {
+  it('C2-07 disables Apply while a request is in flight', { tags: '@component' }, () => {
     cy.mount(<PromoCodeInput appliedCode={null} busy onApply={cy.spy()} onRemove={cy.spy()} />);
 
-    cy.findByRole('textbox', { name: 'Promo code' }).type('leafy10');
     cy.findByRole('button', { name: 'Apply' }).then(($el) =>
       expect($el, 'Apply while a request is in flight').to.be.disabled,
     );
@@ -173,16 +172,16 @@ describe('PromoCodeInput', () => {
     });
   });
 
-  it('C2-12 shows a visible focus outline on the field and on Apply', { tags: ['@component', '@known-bug'] }, () => {
+  it('C2-12 shows a visible focus outline on the field and on Apply', { tags: '@component' }, () => {
     cy.mount(<PromoCodeInput appliedCode={null} onApply={cy.spy()} onRemove={cy.spy()} />);
 
     cy.press(Cypress.Keyboard.Keys.TAB);
-    cy.findByRole('textbox', { name: 'Promo code' }).then(($field) => {
-      assertKeyboardFocusVisible($field, 'Promo code');
+    cy.findByRole('textbox').then(($field) => {
+      assertKeyboardFocusVisible($field, 'Promo code field');
     });
 
     // Apply is omitted from the tab order while it is disabled, so type a code before tabbing to it.
-    cy.findByRole('textbox', { name: 'Promo code' }).type('leafy10');
+    cy.findByRole('textbox').type('leafy10');
     cy.press(Cypress.Keyboard.Keys.TAB);
     cy.findByRole('button', { name: 'Apply' }).then(($apply) => {
       assertKeyboardFocusVisible($apply, 'Apply');

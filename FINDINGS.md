@@ -35,7 +35,9 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
   - `web/cypress/ui/plant.cy.ts` — PL-01, PL-06
   - `web/cypress/ui/orders.cy.ts` — OR-06
   - `web/cypress/ui/order.cy.ts` — OD-01, OD-06, OD-08, OD-11
-  - Promo UI totals that require two decimals (e.g. checkout/orders promo specs)
+  - `web/cypress/ui/checkout-promo.cy.ts` — U2-01 (expects `$18.20`, got `$18.2`), U2-05 (expects `$12.50`, got `$12.5`)
+  - Promo UI totals that require two decimals (e.g. orders promo specs)
+  - `web/cypress/ui/orders-promo.cy.ts` — U3-01, U3-02 (actual `$18.2` vs expected `$18.20`)
   Code: `formatPrice` returns `` `$${Math.round(amount * 100) / 100}` `` with no `toFixed(2)`.
 - **Contradicts:** `docs/PRODUCT.md`: "Every price is shown in dollars with **two decimals**, everywhere: `$12.50`, never `$12.5`."
 - **Suggested fix:** Format with `toFixed(2)` (or equivalent) in `formatPrice`.
@@ -104,7 +106,7 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
 - **Evidence:** Executed:
   - Playwright a11y: `tests/a11y/pages.spec.ts` — Browse and Cart; axe rule `label` on `.SearchBox-module__input` (Browse) and the promo `<input>` (Cart); `a11y-report/`.
   - `web/cypress/component/SearchBox.cy.tsx` — "SB-08 gives the search input an accessible name" (tagged `@known-bug`). Visual hint **Search plants** is a `<span>`, not a label.
-  - Promo (tagged `@known-bug`): `web/cypress/ui/cart-promo.cy.ts` (U1 rows requiring textbox name **Promo code**); `web/cypress/component/PromoCodeInput.cy.tsx` (e.g. C2-01, C2-02, C2-09, C2-12). UI shows **Have a promo code?** as a `<p>` and an unlabeled `<input>`.
+  - Promo (tagged `@known-bug`): `web/cypress/ui/cart-promo.cy.ts` (U1 rows requiring textbox name **Promo code**); `web/cypress/component/PromoCodeInput.cy.tsx` (C2-01, C2-09). UI shows **Have a promo code?** as a `<p>` and an unlabeled `<input>`.
 - **Contradicts:** `docs/PRODUCT.md`: "every button and form field has a name a screen reader can announce." Approved cart promo design (`web/cypress/test-design/CartPromo.md` U1-01 / U1-09): visible label **Promo code**.
 - **Suggested fix:** Associate a real `<label>` / `aria-label` with the search input; add a visible **Promo code** label on the promo field (keep Apply/Remove named).
 
@@ -146,14 +148,55 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
 - **Contradicts:** Documented cart behaviour in `docs/APP-MAP.md`: "Change rejected: error toast with the API's `detail`." (the OpenAPI error body includes `detail` for rules such as `stock_limit`).
 - **Suggested fix:** Ensure `mutate(..., { onError })` receives `ApiRequestError` with `detail` as `message` and renders `<Toast tone="error" />`.
 
-## Suspicions — not yet tested
+## Suspicions — possible findings (awaiting human confirmation)
 
-Things that look different from `docs/PRODUCT.md` (or the API contract) but do not yet have a failing Fernly test proving them. "Seen" means it showed up once on the walk; "code" means it comes from reading the source only.
+Things that look different from `docs/PRODUCT.md`, `docs/features/promo-codes.md`, or the API contract. Entries with **executed** evidence failed under the approved promo-codes plan; do not add `@known-bug` until a human confirms. "Seen" / "code" / "inspected" means not yet proven by a Fernly test.
+
+### F-12. `LEAFY10` takes 10% off plants **and** shipping
+
+- **Where:** `POST /api/cart/promo` percentage discount — **Business rules in the API**
+- **Impact:** Customers are undercharged on the discount line (or totals disagree with the feature doc): e.g. Small Pothos discount `1.95` instead of `1.25` (10% of 12.50 + 6.95).
+- **Evidence:** Executed — `tests/api/promo-codes.spec.ts` M1 (Pothos, cutting, fiddle, qty 2), M3 ($50 bird), M4 / SCH1 order money fields, B1 `leafy10`; `tests/e2e/promo-codes.spec.ts` E1 leafy10 flow (missing `−$1.25` / `$18.20`). Checkout/Order axe HTML shows totals like `$17.5` for a Pothos+LEAFY10 cart.
+- **Contradicts:** `docs/features/promo-codes.md` / OpenAPI: percentage off the plant subtotal, **never** off shipping.
+- **Suggested fix:** Base the percentage on plant subtotal only; leave shipping out of the discount.
+
+### F-13. Free shipping at exactly $50.00 is not granted
+
+- **Where:** Cart shipping calculation — **Business rules in the API**
+- **Impact:** A cart at the free-shipping line (Bird of Paradise size S, subtotal 50.00) still pays `$6.95`.
+- **Evidence:** Executed — `tests/api/promo-codes.spec.ts` “SCH1 a $50.00 Bird of Paradise with no code ships free” (shipping `6.95`, expected `0`). M3 LEAFY10 on that cart also discounts as if shipping were charged (`5.70` = 10% of 50 + 6.95). Code/inspected: `subtotal > FREE_SHIPPING_FROM` (strict greater than 50).
+- **Contradicts:** `docs/PRODUCT.md`: free when the subtotal is **$50.00 or more**.
+- **Suggested fix:** Use `>=` for the free-shipping threshold.
+
+### F-14. Expired `SPRING5` is accepted instead of refused
+
+- **Where:** `POST /api/cart/promo` — **Business rules in the API**
+- **Impact:** Customers can still apply an expired code; refusal UI and screen-reader announcement never appear.
+- **Evidence:** Executed — `tests/api/promo-codes.spec.ts` N1 `SPRING5` and `spring5` return **200** (expected 400 `promo_invalid`); `tests/e2e/promo-codes.spec.ts` E1 expired (no alert with /expired/); `tests/a11y/promo.spec.ts` X1 expired refusal (same). Feature table: `SPRING5` expired 30 Apr 2026.
+- **Contradicts:** `docs/features/promo-codes.md` / OpenAPI: expired codes refused with `promo_invalid` and an expired message.
+- **Suggested fix:** Reject expired catalog codes with `promo_invalid` and an “expired” detail.
+
+### F-15. Another customer can open someone else’s order (200 instead of 404)
+
+- **Where:** `GET /api/orders/{orderId}` — **Authorization**
+- **Impact:** Ben can read Ava’s order (including `promoCode` / `discount`) instead of “Order not found”.
+- **Evidence:** Executed — `tests/api/promo-codes.spec.ts` P1: Ben’s `GET /api/orders/{orderId}` for Ava’s order returned **200**, expected **404**.
+- **Contradicts:** `docs/PRODUCT.md` / `docs/APP-MAP.md`: only the customer who placed the order can see it; anyone else gets 404 (no `rule`).
+- **Suggested fix:** Scope order fetch to the authenticated customer; return 404 for others.
+
+### F-16. Cart cannot apply a replacement code without Remove first
+
+- **Where:** `PromoCodeInput` / cart promo slot — **Pages**
+- **Impact:** After a code is applied, only Remove is shown; the customer cannot type a new code to replace it in one step.
+- **Evidence:** Executed — `tests/e2e/promo-codes.spec.ts` “E1 FREESHIP replaces LEAFY10…” (promo textbox gone after LEAFY10). Inspected / U1-08 tagged `@known-bug` (also blocked by F-07 unlabeled field). API **does** replace on a second `POST` (B1 passed).
+- **Contradicts:** `docs/features/promo-codes.md`: applying a new code replaces the old one.
+- **Suggested fix:** Keep an apply field available while a code is applied, or document that Remove is required before a new code.
+
+### Other suspicions (not yet proven by a Fernly test)
 
 - **Plant page after a "Likes the same light" link** (Caching) — seen: address bar `/plants/pl-fiddle` while the page still showed Bird of Paradise; code: `usePlant` caches under `['plant']` without `plantId`. *May contradict:* "The plant page always shows the plant in the address bar, including after following a "Likes the same light" link."
 - **Price: high to low sorts cheapest first** (Business rules in the API) — seen via API: `GET /api/plants?sort=price-desc` first item Succulent Cutting at $0.99; code: `price-desc` shares the ascending comparator with `price-asc`. *May contradict:* "**Price: high to low (most expensive first)**." OpenAPI: `price-desc (highest first)`.
 - **Plant detail `rating` is a string** (The contract) — code/API: `getPlant` sets `rating: plant.rating.toFixed(1)` (e.g. `"4.1"`). *May contradict:* OpenAPI `Plant` / `PlantSummary`: `rating` is a number.
-- **Free shipping at exactly $50.00** (Business rules in the API) — code: `subtotal > FREE_SHIPPING_FROM` (strict greater than 50), so Bird of Paradise at $50.00 still gets `$6.95` shipping. *May contradict:* "Shipping costs $6.95, and is free when the subtotal is $50.00 or more."
 - **Page titles** (Accessibility) — seen: every page has the title "Fernly — plants for every windowsill". *May contradict:* WCAG 2.4.2 Page Titled under the PRODUCT AA aim.
 - **Order page after signing out and in as another customer** (Caching / Authorization) — code: sign-out drops cached cart and order list but not `['order', id]`. *May contradict:* order privacy and "Signing out forgets the session on this device."
 - **Plant page quantity after a "Likes the same light" link** (Pages) — code: quantity and size state are not reset when `plantId` changes. *May contradict:* "**Quantity** starts at 1 …"
@@ -172,11 +215,10 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 ## Rules to prove next
 
 - Remaining sort modes (featured, price-asc, name, best rated) through `GET /api/plants` and the UI — alongside `price-desc` above.
-- Shipping just below $50, and at exactly $50, with and without a free-shipping promo.
-- Order privacy: another signed-in customer’s `GET /api/orders/{orderId}`; cart line `PATCH` / `DELETE` across customers.
+- Cart line `PATCH` / `DELETE` across customers (order privacy for GET is covered as F-15).
 - "Placing an order charges the cart as it is, lowers the stock, and empties the cart." and "Orders are listed newest first."
 - Search ignores case and matches Latin names; Low + Bright shows either; Pet-safe shows only pet-safe plants.
 - "Passwords have at least 8 characters; an email can have only one account."
-- Promo percentage vs shipping (OpenAPI / `docs/features/promo-codes.md`: never off shipping); expired codes (`SPRING5`).
 - Contract shape: every response field against the OpenAPI schemas, including two-decimal money values and numeric `rating` on plant detail.
 - Page titles; order-cache after sign-out; plant quantity reset on similar-light navigation.
+- Human confirmation of F-12–F-16 (then move to Findings / `@known-bug` as appropriate).
