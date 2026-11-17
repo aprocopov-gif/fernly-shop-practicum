@@ -26,9 +26,10 @@ agent -p --force --trust --output-format stream-json "$prompt" \
           subtype="$(printf '%s' "$line" | jq -r '.subtype // empty' 2>/dev/null || true)"
           if [ "$subtype" = "started" ]; then
             tool="$(printf '%s' "$line" | jq -r '
-              .tool_call.function.name // .tool_call.name // .tool_name // .name // "tool"
+              (.tool_call | keys[0] // .tool_call.function.name // .name // "tool")
+              | sub("ToolCall$";"")
             ' 2>/dev/null || echo "tool")"
-            echo "[agent] tool: $tool"
+            echo "→ ${tool}"
           fi
           ;;
       esac

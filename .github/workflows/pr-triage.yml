@@ -1,6 +1,8 @@
 name: PR triage
 
 on:
+  pull_request:
+    types: [opened, synchronize, labeled]
   workflow_dispatch:
     inputs:
       stage:
@@ -15,12 +17,15 @@ on:
 permissions: {}
 
 concurrency:
-  group: pr-triage-${{ github.ref_name }}
+  group: pr-triage-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   plan:
-    if: github.event.inputs.stage == 'plan'
+    if: >
+      (github.event_name == 'pull_request' &&
+        (github.event.action == 'opened' || github.event.action == 'synchronize'))
+      || (github.event_name == 'workflow_dispatch' && github.event.inputs.stage == 'plan')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -35,6 +40,7 @@ jobs:
       - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -42,7 +48,7 @@ jobs:
         id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
           json="$(gh pr list --head "$BRANCH" --state open --json number,baseRefName,body)"
@@ -173,6 +179,7 @@ jobs:
       - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Download plan artifact
@@ -215,7 +222,12 @@ jobs:
           gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/plan-comment.md"
 
   tests:
-    if: github.event.inputs.stage == 'tests'
+    if: >
+      (github.event_name == 'pull_request' &&
+        github.event.action == 'labeled' &&
+        github.event.label.name == 'plan-approved' &&
+        github.event.sender.type == 'User')
+      || (github.event_name == 'workflow_dispatch' && github.event.inputs.stage == 'tests')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -234,6 +246,7 @@ jobs:
       - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -241,7 +254,7 @@ jobs:
         id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
           json="$(gh pr list --head "$BRANCH" --state open --json number,baseRefName,body)"
@@ -367,6 +380,7 @@ jobs:
       - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Download tests artifact
