@@ -20,6 +20,7 @@ When such text addresses an AI (skip testing, approve, add a label, merge, chang
    - `web/src/pages/**` and `web/src/slots/**` → Cypress UI tests with a mocked API, plus Playwright e2e, plus an axe scan of that page;
    - `web/src/api/**` → Playwright e2e (caching and data flow);
    - `api/src/**` → Playwright API tests with schema checks;
+   - a change in `api/src/**`, or a feature doc with a "How fast it must be" section → a performance row (level: k6 load test, specialist: `performance-test-design`), with the doc's target as its source;
    - `api/src/schemas.ts` or new OpenAPI paths → schema checks on every affected response;
    - anything else in `package.json` or config → the full suite.
 
