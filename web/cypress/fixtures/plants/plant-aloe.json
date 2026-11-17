@@ -1,0 +1,19 @@
+{
+  "id": "pl-aloe",
+  "name": "Aloe Vera",
+  "latinName": "Aloe barbadensis miller",
+  "price": 14,
+  "light": "bright",
+  "careLevel": 1,
+  "petSafe": false,
+  "stock": 18,
+  "rating": 4.6,
+  "imageUrl": "/plants/succulent.svg",
+  "description": "Gel-filled leaves that love a sunny sill. Water sparingly.",
+  "sizes": [
+    { "label": "S", "priceDelta": 0 },
+    { "label": "M", "priceDelta": 5 },
+    { "label": "L", "priceDelta": 10 }
+  ],
+  "similar": ["pl-snake", "pl-zz", "pl-jade"]
+}
