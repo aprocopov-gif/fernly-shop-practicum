@@ -60,13 +60,13 @@ describe('Browse back-in-stock badge', () => {
       cy.findByText(/Only .+ left/).should('not.exist');
     });
 
+    assertBadgeDoesNotCoverPhotoOrSave('String of Pearls', 'Only 1 left');
+    assertBadgeDoesNotCoverPhotoOrSave('Thai Constellation', 'Only 2 left');
+    assertBadgeDoesNotCoverPhotoOrSave('Hoya Carnosa', 'Only 3 left');
+
     withinCard('Chinese Money Plant', () => {
       cy.findByText('Out of stock');
       cy.findByText('Only 0 left').should('not.exist');
     });
-
-    assertBadgeDoesNotCoverPhotoOrSave('String of Pearls', 'Only 1 left');
-    assertBadgeDoesNotCoverPhotoOrSave('Thai Constellation', 'Only 2 left');
-    assertBadgeDoesNotCoverPhotoOrSave('Hoya Carnosa', 'Only 3 left');
   });
 });

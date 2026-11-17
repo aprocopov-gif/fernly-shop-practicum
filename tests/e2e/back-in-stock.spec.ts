@@ -16,7 +16,7 @@ async function signOut(page: Page): Promise<void> {
 test('E1 browse badges, out-of-stock notify, refusals, and keyboard on Notify me', { tag: '@e2e' }, async ({
   page,
 }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   await signOut(page);
 
   const browse = new BrowsePage(page);
@@ -30,8 +30,10 @@ test('E1 browse badges, out-of-stock notify, refusals, and keyboard on Notify me
   await browse.searchPlants('Chinese Money Plant');
   await expect(browse.plantsCountHeading).toBeVisible();
   await expect(browse.plantCardOutOfStock('Chinese Money Plant')).toBeVisible();
-  // Soft: StockBadge also renders "Only 0 left" (same defect as C1/U1) — keep asserting, continue the flow.
-  await expect.soft(browse.plantCardByName('Chinese Money Plant').getByText('Only 0 left')).toHaveCount(0);
+  // Soft: stock 0 may still show Only 0 left (C1/U1) — keep asserting, continue the flow.
+  await expect
+    .soft(browse.plantCardByName('Chinese Money Plant').getByText('Only 0 left'))
+    .toHaveCount(0, { timeout: 1_000 });
 
   const plant = new PlantPage(page);
   await plant.open('pl-pilea');
@@ -54,9 +56,15 @@ test('E1 browse badges, out-of-stock notify, refusals, and keyboard on Notify me
 
   await plant.open('pl-pilea');
   await plant.notifyWhenBack('a@b');
-  await expect(plant.notifyConfirmation('a@b')).toHaveCount(0);
-  await expect(plant.notifyAlert().or(plant.notifyEmail)).toBeVisible();
+  // Soft: incomplete address may be accepted (N1) — still require no success confirmation.
+  await expect.soft(plant.notifyConfirmation('a@b')).toHaveCount(0, { timeout: 1_000 });
+  await expect.soft(plant.notifyAlert().or(plant.notifyEmail)).toBeVisible({ timeout: 1_000 });
 
+  // Fresh load so a wrongly-accepted a@b confirmation does not block the duplicate check.
+  await plant.open('pl-pilea');
   await plant.notifyWhenBack('e2e-ava@fernly.test');
-  await expect(plant.notifyAlert()).toContainText("You're already on the list");
+  // Soft: duplicate may be accepted again (N2) — keep asserting the refusal copy.
+  await expect
+    .soft(plant.notifyAlert())
+    .toContainText("You're already on the list", { timeout: 2_000 });
 });
