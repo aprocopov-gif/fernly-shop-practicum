@@ -1,0 +1,79 @@
+{
+  "items": [
+    {
+      "id": "pl-pearls",
+      "name": "String of Pearls",
+      "latinName": "Senecio rowleyanus",
+      "price": 14,
+      "light": "bright",
+      "careLevel": 3,
+      "petSafe": false,
+      "stock": 1,
+      "rating": 4.2,
+      "imageUrl": "/plants/succulent.svg"
+    },
+    {
+      "id": "pl-thai",
+      "name": "Thai Constellation",
+      "latinName": "Monstera deliciosa 'Thai Constellation'",
+      "price": 95,
+      "light": "bright",
+      "careLevel": 2,
+      "petSafe": false,
+      "stock": 2,
+      "rating": 4.9,
+      "imageUrl": "/plants/monstera.svg"
+    },
+    {
+      "id": "pl-hoya",
+      "name": "Hoya Carnosa",
+      "latinName": "Hoya carnosa",
+      "price": 22,
+      "light": "bright",
+      "careLevel": 1,
+      "petSafe": true,
+      "stock": 3,
+      "rating": 4.5,
+      "imageUrl": "/plants/fern.svg"
+    },
+    {
+      "id": "pl-pothos",
+      "name": "Pothos 'Golden'",
+      "latinName": "Epipremnum aureum",
+      "price": 12.5,
+      "light": "low",
+      "careLevel": 1,
+      "petSafe": false,
+      "stock": 30,
+      "rating": 4.7,
+      "imageUrl": "/plants/pothos.svg"
+    },
+    {
+      "id": "pl-pilea",
+      "name": "Chinese Money Plant",
+      "latinName": "Pilea peperomioides",
+      "price": 15,
+      "light": "medium",
+      "careLevel": 1,
+      "petSafe": true,
+      "stock": 0,
+      "rating": 4.7,
+      "imageUrl": "/plants/succulent.svg"
+    },
+    {
+      "id": "pl-fiddle",
+      "name": "Fiddle Leaf Fig",
+      "latinName": "Ficus lyrata",
+      "price": 48,
+      "light": "bright",
+      "careLevel": 3,
+      "petSafe": false,
+      "stock": 4,
+      "rating": 4.1,
+      "imageUrl": "/plants/fiddle.svg"
+    }
+  ],
+  "total": 6,
+  "page": 1,
+  "pageSize": 12
+}

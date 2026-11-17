@@ -257,10 +257,44 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
 - **Contradicts:** `docs/features/plant-reviews.md`: “After posting, the review appears in the list right away.”
 - **Suggested fix:** Invalidate `['reviews', plantId]` (match the query key).
 
+### F-23. Out-of-stock cards show “Only 0 left”
+
+- **Where:** `StockBadge` (`web/src/components/StockBadge.tsx`), Browse via plant-card slot
+- **Category:** Components
+- **Impact:** Sold-out plants show a misleading **Only 0 left** badge instead of only the **Out of stock** overlay.
+- **Evidence:** Executed:
+  - `web/cypress/component/StockBadge.cy.tsx` — C1 (`stock={0}` still finds **Only 0 left**; screenshot under `web/cypress/screenshots/StockBadge.cy.tsx/`)
+  - `web/cypress/ui/back-in-stock-browse.cy.ts` — U1 Chinese Money Plant card
+  - `tests/e2e/back-in-stock.spec.ts` — E1 soft assert on Pilea card
+  Code: renders whenever `stock > 3` is false, including `0`.
+- **Contradicts:** `docs/features/back-in-stock.md`: “At 0 the card shows only ‘Out of stock’ — never ‘Only 0 left’.”
+- **Suggested fix:** Return null when `stock < 1` (badge only for 1–3).
+
+### F-24. Incomplete email `a@b` is accepted for back-in-stock notify
+
+- **Where:** `POST /api/plants/{plantId}/notify`
+- **Category:** Business rules in the API
+- **Impact:** Customers can sign up with an incomplete address that will never receive mail.
+- **Evidence:** Executed: `tests/api/back-in-stock.spec.ts` — N1 (`a@b` → HTTP **201**, expected **400**). E1 later notify flow also broke after submitting `a@b` (form replaced by success confirmation).
+- **Contradicts:** `docs/features/back-in-stock.md`: “The email must be a full address like `name@example.com`; `a@b` or `name@` are refused.”
+- **Suggested fix:** Validate a full address (domain with a dot / TLD) and return 400 `validation_error`.
+
+### F-25. Duplicate back-in-stock sign-ups are accepted
+
+- **Where:** `POST /api/plants/{plantId}/notify`
+- **Category:** Business rules in the API
+- **Impact:** The same email can join the list repeatedly; customers never see “You're already on the list.”
+- **Evidence:** Executed:
+  - `tests/api/back-in-stock.spec.ts` — N2 second `n2-ava@fernly.test` → **201** (expected **409** `already_subscribed`); SCH1 re-subscribe → **201**
+  - `tests/a11y/back-in-stock.spec.ts` — X1 soft: already-subscribed alert never appeared after a second submit
+- **Contradicts:** `docs/features/back-in-stock.md`: “One sign-up per email per plant, ignoring upper and lower case: signing up again is refused with ‘You're already on the list’.”
+- **Suggested fix:** Compare emails case-insensitively; return 409 `already_subscribed` with that detail.
+
 ## Suspicions — not yet tested
 
 Things that look different from `docs/PRODUCT.md` (or the API contract) but do not yet have a failing Fernly test proving them. "Seen" means it showed up once on the walk; "code" means it comes from reading the source only.
 
+- **StockBadge covers the photo / save heart** (Components / Pages) — code: `StockBadge.module.css` `position: absolute; top/right: 0.6rem; z-index: 2` matches `PlantCard` save placement. U1 geometry asserts did not run (blocked by **F-23**). *May contradict:* badge “never covers the photo or the save button.”
 - **Plant page after a "Likes the same light" link** (Caching) — seen: address bar `/plants/pl-fiddle` while the page still showed Bird of Paradise; code: `usePlant` caches under `['plant']` without `plantId`. *May contradict:* "The plant page always shows the plant in the address bar, including after following a "Likes the same light" link."
 - **Page titles** (Accessibility) — seen: every page has the title "Fernly — plants for every windowsill". *May contradict:* WCAG 2.4.2 Page Titled under the PRODUCT AA aim.
 - **Order page after signing out and in as another customer** (Caching / Authorization) — code: sign-out drops cached cart and order list but not `['order', id]`. *May contradict:* "Signing out forgets the session on this device." (cross-customer `GET` itself is **F-15**).
@@ -276,6 +310,7 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 - Should a signed-in customer who opens `/login` or `/register` be redirected? The form shows again.
 - Promo plan rows **Q1–Q4** (`docs/test-plans/feature/promo-codes.md`): spaces around a code; a discount with no code; free-shipping hint while `FREESHIP` is applied under $50; what happens to the code after the last plant is removed. Neither `PRODUCT.md` nor `docs/features/promo-codes.md` answers these — no tests written.
 - Plant-reviews plan rows **Q1–Q5** (`docs/test-plans/feature/plant-reviews.md`): exact empty-state sentence; exact thanks toast wording; whether the plant page exposes a delete control; exact `already_reviewed` / author-mismatch `detail` beyond “Review not found”; whether the UI hides **Write a review** after the customer already reviewed. No tests written (`assumed — ask`).
+- Back-in-stock plan rows **Q1–Q5** (`docs/test-plans/feature/back-in-stock.md`): exact validation `detail` for incomplete emails; whether `name@example` (no TLD) is refused; subscriptions after admin reset; badge placement without save; empty / whitespace / busy on `NotifyForm`. No tests written (`assumed — ask`).
 - Does the Orders list UI re-sort if the fixture/API array is oldest-first, or must the payload already be newest-first? (OR-A2)
 
 ## Rules to prove next
