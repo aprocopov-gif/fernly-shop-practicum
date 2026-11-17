@@ -1,10 +1,12 @@
 # QA pipeline metrics
 
-**Totals (1 plan-approved PR):** routing accuracy **—** (— plan rows right); false-alarm rate **0%** (0/0 findings). Agent time **11.6** min across PRs. Spend is not in GitHub — see the [Cursor dashboard](https://cursor.com/dashboard?tab=usage).
+**Totals (3 plan-approved PRs):** routing accuracy **—** (— plan rows right); false-alarm rate **0%** (0/0 findings). Agent time **697.9000000000001** min across PRs. Spend is not in GitHub — see the [Cursor dashboard](https://cursor.com/dashboard?tab=usage).
 
 | PR | Rows right | Rows reviewed | Min to plan | Min to QA report | Agent min | Findings | False alarms |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | [#1](https://github.com/aprocopov-gif/fernly-shop-practicum/pull/1) | — | — | — | — | 11.6 | 0 | 0 |
+| [#2](https://github.com/aprocopov-gif/fernly-shop-practicum/pull/2) | — | — | 7182.8 | 7220.8 | 62.6 | 0 | 0 |
+| [#3](https://github.com/aprocopov-gif/fernly-shop-practicum/pull/3) | — | — | 8605.4 | — | 623.7 | 0 | 0 |
 
 ## How each number is measured
 
@@ -19,4 +21,4 @@
 
 _Note: Issues are disabled on `aprocopov-gif/fernly-shop-practicum`, so findings and false-alarm counts are 0 until issues are enabled._
 
-_Generated at 2026-11-16T05:08:46.971Z by `node scripts/qa-metrics.mjs`._
+_Generated at 2026-11-17T16:48:33.857Z by `node scripts/qa-metrics.mjs`._
