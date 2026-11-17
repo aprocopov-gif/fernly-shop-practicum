@@ -4,6 +4,7 @@ import { scanPage } from './helpers/scan.js';
 import { signInFirstCustomerWithCartLine, signOutInBrowser } from './helpers/session.js';
 
 test('Browse', { tag: '@a11y' }, async ({ page }, testInfo) => {
+  test.fail(true, 'F-06: plant card save button has no accessible name');
   await signOutInBrowser(page);
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 2, name: /\d+ plants/ })).toBeVisible();
@@ -13,6 +14,7 @@ test('Browse', { tag: '@a11y' }, async ({ page }, testInfo) => {
 });
 
 test('Plant', { tag: '@a11y' }, async ({ page }, testInfo) => {
+  test.fail(true, 'F-10: plant hero image has no alternative text');
   await signOutInBrowser(page);
   await page.goto('/plants/pl-monstera');
   await expect(page.getByRole('heading', { level: 1, name: 'Monstera Deliciosa' })).toBeVisible();
@@ -31,6 +33,7 @@ test('Sign in', { tag: '@a11y' }, async ({ page }, testInfo) => {
 });
 
 test('Cart', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
+  test.fail(true, 'F-07: promo field on Cart has no accessible name');
   await signInFirstCustomerWithCartLine(page, request);
   await page.goto('/cart');
   await expect(page.getByRole('heading', { name: 'Your cart' })).toBeVisible();
@@ -40,6 +43,7 @@ test('Cart', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
 });
 
 test('Checkout', { tag: '@a11y' }, async ({ page, request }, testInfo) => {
+  test.fail(true, 'F-05: price text fails colour contrast on Checkout');
   await signInFirstCustomerWithCartLine(page, request);
   await page.goto('/checkout');
   await expect(page.getByRole('heading', { name: 'Checkout' })).toBeVisible();

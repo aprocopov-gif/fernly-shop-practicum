@@ -5,19 +5,25 @@ export class BrowsePage {
   readonly plantsCountHeading: Locator;
   readonly firstPlantCard: Locator;
   readonly firstPlantCardHeading: Locator;
-  /** Icon-only save (heart) control — no accessible name; found by role within the card article. */
+  readonly firstPlantCardImage: Locator;
+  /**
+   * F-06: plant card save (heart) has no accessible name — found by role within its card article.
+   */
   readonly firstPlantCardHeartButton: Locator;
   readonly searchForm: Locator;
   readonly searchInput: Locator;
+  readonly searchButton: Locator;
 
   constructor(private readonly page: Page) {
     this.sortBy = page.getByLabel('Sort by');
     this.plantsCountHeading = page.getByRole('heading', { level: 2, name: /\d+ plants/ });
     this.firstPlantCard = page.getByRole('article').first();
     this.firstPlantCardHeading = this.firstPlantCard.getByRole('heading', { level: 3 });
+    this.firstPlantCardImage = this.firstPlantCard.getByRole('img');
     this.firstPlantCardHeartButton = this.firstPlantCard.getByRole('button');
     this.searchForm = page.getByRole('search');
     this.searchInput = this.searchForm.getByRole('searchbox');
+    this.searchButton = this.searchForm.getByRole('button', { name: 'Search', exact: true });
   }
 
   /** Catalog card for a plant by its display name. */
@@ -25,6 +31,11 @@ export class BrowsePage {
     return this.page.getByRole('article').filter({
       has: this.page.getByRole('heading', { level: 3, name }),
     });
+  }
+
+  /** Decorative plant image inside a named catalog card. */
+  plantCardImage(name: string): Locator {
+    return this.plantCardByName(name).getByRole('img');
   }
 
   /**
@@ -53,7 +64,7 @@ export class BrowsePage {
    */
   async searchPlants(query: string): Promise<BrowsePage> {
     await this.searchInput.fill(query);
-    await this.searchForm.getByRole('button', { name: 'Search', exact: true }).click();
+    await this.searchButton.click();
     return this;
   }
 }

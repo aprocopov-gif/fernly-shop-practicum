@@ -126,7 +126,7 @@ describe('OrderSummary', () => {
     });
   });
 
-  it('C1-05 names the summary region with the Paid heading', { tags: ['@component', '@known-bug'] }, () => {
+  it('C1-05 names the summary region with the Paid heading', { tags: '@component' }, () => {
     cy.mount(
       <OrderSummary
         title="Paid"

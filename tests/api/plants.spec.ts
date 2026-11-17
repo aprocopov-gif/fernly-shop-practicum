@@ -6,6 +6,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 test('GET /api/plants/{plantId} returns a plant that matches Plant', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-18: plant detail rating is a string, not a number');
   const response = await request.get('/api/plants/pl-monstera');
   expect(response.status()).toBe(200);
   const plant: unknown = await response.json();
@@ -13,6 +14,7 @@ test('GET /api/plants/{plantId} returns a plant that matches Plant', { tag: '@ap
 });
 
 test('GET /api/plants?sort=price-desc lists the most expensive plant first', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-17: price-desc sorts cheapest first');
   const response = await request.get('/api/plants', { params: { sort: 'price-desc' } });
   expect(response.status()).toBe(200);
   const body: unknown = await response.json();

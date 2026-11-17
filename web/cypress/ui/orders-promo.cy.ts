@@ -158,7 +158,7 @@ describe('Orders promo', () => {
     });
   });
 
-  it('U3-07 omits the Discount row and lists the undiscounted total $19.45', { tags: ['@ui', '@known-bug'] }, () => {
+  it('U3-07 omits the Discount row and lists the undiscounted total $19.45', { tags: '@ui' }, () => {
     stubSignedIn();
     cy.intercept('GET', /\/api\/orders$/, { fixture: 'promo/orders-plain.json' }).as('orders');
     cy.intercept('GET', '/api/orders/ord-plain', { fixture: 'promo/order-plain.json' }).as('order');

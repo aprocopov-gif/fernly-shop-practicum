@@ -181,6 +181,7 @@ const POTHOS_FREE = { subtotal: 12.5, discount: 0, promoCode: 'FREESHIP', shippi
 const POTHOS_NONE = { subtotal: 12.5, discount: 0, promoCode: null, shipping: 6.95, total: 19.45 };
 
 test('M1 LEAFY10 takes 10% off one Small Pothos and leaves shipping at $6.95', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-pothos');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -190,6 +191,7 @@ test('M1 LEAFY10 takes 10% off one Small Pothos and leaves shipping at $6.95', {
 });
 
 test('M1 rounds 10% of a $0.99 cutting to the nearest cent', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-cutting');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -205,6 +207,7 @@ test('M1 rounds 10% of a $0.99 cutting to the nearest cent', { tag: '@api' }, as
 });
 
 test('M1 does not take 10% off shipping on a $49.00 fiddle', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-fiddle');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -220,6 +223,7 @@ test('M1 does not take 10% off shipping on a $49.00 fiddle', { tag: '@api' }, as
 });
 
 test('M1 recomputes the discount when the line quantity changes', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   const added = await addPlant(request, auth, 'pl-pothos');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -265,6 +269,7 @@ test('M2 FREESHIP on a $50.00 cart keeps shipping at $0.00 and discount at 0', {
 });
 
 test('M3 a $50.00 subtotal stays free to ship after LEAFY10', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-bird');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -289,6 +294,7 @@ test('M3 a $49.00 subtotal still pays shipping after LEAFY10', { tag: '@api' }, 
 });
 
 test('M4 the order keeps LEAFY10 and the cart forgets it', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-pothos');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -366,12 +372,14 @@ test('SCH1 cart routes return a Cart, and a cart with no code follows the shippi
 });
 
 test('SCH1 a $50.00 Bird of Paradise with no code ships free', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-13: shipping still charged at exactly $50.00 subtotal');
   const auth = await register(request);
   const bird = await addPlant(request, auth, 'pl-bird');
   assertCart(bird, { subtotal: 50, discount: 0, promoCode: null, shipping: 0, total: 50 });
 });
 
 test('SCH1 order routes return an Order, including the list after a discounted checkout', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-pothos');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -401,6 +409,7 @@ test('SCH1 order routes return an Order, including the list after a discounted c
 });
 
 test('P1 another customer cannot see the code or the discounted order', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-15: another customer can GET someone else\'s order');
   const ava = await login(
     request,
     process.env.FERNLY_USER_EMAIL ?? 'ava@fernly.test',
@@ -467,6 +476,7 @@ test('S1 promo routes without a token return auth_required and do not change the
 });
 
 test('B1 leafy10 and Leafy10 store the catalog code LEAFY10', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-12: percentage promo discounts shipping as well as plants');
   const lower = await register(request);
   await addPlant(request, lower, 'pl-pothos');
   const lowerApplied = await applyCode(request, lower, 'leafy10');
@@ -514,6 +524,7 @@ test('B1 DELETE /api/cart/promo clears a code and is fine when none is stored', 
 });
 
 test('N1 an expired code is refused and the current code stays', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-14: expired SPRING5 is accepted instead of refused');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-pothos');
   const applied = await applyCode(request, auth, 'LEAFY10');
@@ -581,6 +592,7 @@ test('N1 a missing or empty code is validation_error and does not change LEAFY10
 });
 
 test('N1 spring5 is refused as expired, the same as SPRING5', { tag: '@api' }, async ({ request }) => {
+  test.fail(true, 'F-14: expired SPRING5 is accepted instead of refused');
   const auth = await register(request);
   await addPlant(request, auth, 'pl-pothos');
   const refused = await applyCode(request, auth, 'spring5');

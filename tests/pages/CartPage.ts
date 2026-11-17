@@ -15,6 +15,7 @@ export class CartPage {
   constructor(private readonly page: Page) {
     this.heading = page.getByRole('heading', { name: 'Your cart' });
     this.emptyHeading = page.getByRole('heading', { name: 'Your cart is empty' });
+    // F-07: promo input has no accessible name — found as the main textbox until labeled.
     this.promoCodeField = page.getByRole('main').getByRole('textbox');
     this.promoCodeLabeledField = page.getByRole('textbox', { name: 'Promo code' });
     this.applyPromoButton = page.getByRole('button', { name: 'Apply' });
@@ -34,6 +35,11 @@ export class CartPage {
     return this.page.getByText(code, { exact: true });
   }
 
+  /** Any visible text that mentions a substring (e.g. a refused code). */
+  textMentioning(text: string): Locator {
+    return this.page.getByText(text, { exact: false });
+  }
+
   /**
    * Opens the signed-in cart.
    * @returns This cart page.
@@ -44,7 +50,26 @@ export class CartPage {
   }
 
   /**
+   * Reloads the current page (keeps session).
+   * @returns This cart page.
+   */
+  async reload(): Promise<CartPage> {
+    await this.page.reload();
+    return this;
+  }
+
+  /**
+   * Moves focus to the next control (Tab).
+   * @returns This cart page.
+   */
+  async pressTab(): Promise<CartPage> {
+    await this.page.keyboard.press('Tab');
+    return this;
+  }
+
+  /**
    * Types a code and clicks Apply (uses the unnamed promo field).
+   * @param code Promo code to apply.
    * @returns This cart page.
    */
   async applyPromoCode(code: string): Promise<CartPage> {
