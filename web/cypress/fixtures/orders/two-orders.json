@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ord-newer",
+    "status": "placed",
+    "createdAt": "2026-11-10T15:00:00.000Z",
+    "lines": [
+      {
+        "id": "ln-newer-1",
+        "plantId": "pl-maidenhair",
+        "name": "Maidenhair Fern",
+        "size": "S",
+        "unitPrice": 12.5,
+        "quantity": 2,
+        "lineTotal": 25,
+        "imageUrl": "/plants/fern.svg"
+      },
+      {
+        "id": "ln-newer-2",
+        "plantId": "pl-snake",
+        "name": "Snake Plant",
+        "size": "M",
+        "unitPrice": 18,
+        "quantity": 1,
+        "lineTotal": 18,
+        "imageUrl": "/plants/snake.svg"
+      }
+    ],
+    "subtotal": 43,
+    "discount": 0,
+    "promoCode": null,
+    "shipping": 6.95,
+    "total": 49.95,
+    "shippingAddress": {
+      "fullName": "Ava Green",
+      "address": "1 Fern Lane",
+      "city": "Portland",
+      "postalCode": "97201"
+    }
+  },
+  {
+    "id": "ord-older",
+    "status": "placed",
+    "createdAt": "2026-11-01T15:00:00.000Z",
+    "lines": [
+      {
+        "id": "ln-older-1",
+        "plantId": "pl-pothos",
+        "name": "Pothos 'Golden'",
+        "size": "S",
+        "unitPrice": 12.5,
+        "quantity": 1,
+        "lineTotal": 12.5,
+        "imageUrl": "/plants/trailing.svg"
+      }
+    ],
+    "subtotal": 12.5,
+    "discount": 0,
+    "promoCode": null,
+    "shipping": 6.95,
+    "total": 19.45,
+    "shippingAddress": {
+      "fullName": "Ava Green",
+      "address": "1 Fern Lane",
+      "city": "Portland",
+      "postalCode": "97201"
+    }
+  }
+]
