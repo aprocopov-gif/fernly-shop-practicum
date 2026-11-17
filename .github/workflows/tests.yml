@@ -1,8 +1,6 @@
 name: tests
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -93,7 +91,7 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  # push / workflow_dispatch: build qa-report artifact only; PR comments on pull_request
+  # Manual run only: build qa-report artifact (PR comments stay off unless this is a pull_request event)
   report:
     needs: [cypress, playwright]
     if: ${{ !cancelled() }}

@@ -1,35 +1,65 @@
 name: PR triage
 
 on:
-  pull_request:
-    types: [opened, synchronize, labeled]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: plan writes the test plan; tests runs the approved plan
+        required: true
+        type: choice
+        default: plan
+        options:
+          - plan
+          - tests
 
 permissions: {}
 
 concurrency:
-  group: pr-triage-${{ github.event.pull_request.number }}
+  group: pr-triage-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   plan:
-    if: github.event.action == 'opened' || github.event.action == 'synchronize'
+    if: github.event.inputs.stage == 'plan'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       ran: ${{ steps.plan_gate.outputs.ran }}
-    env:
-      BASE_REF: ${{ github.event.pull_request.base.ref }}
-      BRANCH: ${{ github.event.pull_request.head.ref }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      base_ref: ${{ steps.resolve.outputs.base_ref }}
+      branch: ${{ steps.resolve.outputs.branch }}
     steps:
-      - name: Checkout PR branch
+      - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Resolve open pull request
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          json="$(gh pr list --head "$BRANCH" --state open --json number,baseRefName,body)"
+          n="$(printf '%s' "$json" | jq 'length')"
+          if [ "$n" -ne 1 ]; then
+            echo "Expected exactly one open PR for $BRANCH, got $n" >&2
+            exit 1
+          fi
+          number="$(printf '%s' "$json" | jq -r '.[0].number')"
+          base="$(printf '%s' "$json" | jq -r '.[0].baseRefName')"
+          printf '%s' "$json" | jq -r '.[0].body // ""' >"$RUNNER_TEMP/pr-body.txt"
+          echo "pr_number=$number" >>"$GITHUB_OUTPUT"
+          echo "base_ref=$base" >>"$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >>"$GITHUB_OUTPUT"
+          echo "PR_NUMBER=$number" >>"$GITHUB_ENV"
+          echo "BASE_REF=$base" >>"$GITHUB_ENV"
+          echo "BRANCH=$BRANCH" >>"$GITHUB_ENV"
 
       - name: Budget gate (skip when no app/doc feature delta)
         id: plan_gate
@@ -66,10 +96,9 @@ jobs:
 
       - name: Write plan agent prompt
         if: steps.plan_gate.outputs.ran == 'true'
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           set -euo pipefail
+          PR_BODY="$(cat "$RUNNER_TEMP/pr-body.txt")"
           {
             cat <<'PROMPT'
           Follow .cursor/agents/change-triage.md yourself. Do not delegate to subagents or Task tools.
@@ -114,7 +143,7 @@ jobs:
         if: success() && steps.plan_gate.outputs.ran == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: plan-${{ github.event.pull_request.number }}
+          name: plan-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/plan.md
             ${{ runner.temp }}/agent.patch
@@ -124,7 +153,7 @@ jobs:
         if: always() && steps.plan_gate.outputs.ran == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: plan-trail-${{ github.event.pull_request.number }}
+          name: plan-trail-${{ github.run_id }}
           path: ${{ runner.temp }}/plan-trail.ndjson
           if-no-files-found: ignore
 
@@ -137,20 +166,19 @@ jobs:
       contents: write
       pull-requests: write
     env:
-      BASE_REF: ${{ github.event.pull_request.base.ref }}
-      BRANCH: ${{ github.event.pull_request.head.ref }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_REF: ${{ needs.plan.outputs.base_ref }}
+      BRANCH: ${{ needs.plan.outputs.branch }}
+      PR_NUMBER: ${{ needs.plan.outputs.pr_number }}
     steps:
-      - name: Checkout PR branch
+      - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Download plan artifact
         uses: actions/download-artifact@v4
         with:
-          name: plan-${{ github.event.pull_request.number }}
+          name: plan-${{ github.run_id }}
           path: ${{ runner.temp }}/plan-artifact
 
       - name: Merge base into PR branch
@@ -187,31 +215,50 @@ jobs:
           gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/plan-comment.md"
 
   tests:
-    if: >-
-      github.event.action == 'labeled'
-      && github.event.label.name == 'plan-approved'
-      && github.event.sender.type == 'User'
+    if: github.event.inputs.stage == 'tests'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       ran: ${{ steps.tests_gate.outputs.ran }}
-    env:
-      BASE_REF: ${{ github.event.pull_request.base.ref }}
-      BRANCH: ${{ github.event.pull_request.head.ref }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      base_ref: ${{ steps.resolve.outputs.base_ref }}
+      branch: ${{ steps.resolve.outputs.branch }}
     steps:
       - name: Tests gate
         id: tests_gate
         run: echo "ran=true" >>"$GITHUB_OUTPUT"
 
-      - name: Checkout PR branch
+      - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Resolve open pull request
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          json="$(gh pr list --head "$BRANCH" --state open --json number,baseRefName,body)"
+          n="$(printf '%s' "$json" | jq 'length')"
+          if [ "$n" -ne 1 ]; then
+            echo "Expected exactly one open PR for $BRANCH, got $n" >&2
+            exit 1
+          fi
+          number="$(printf '%s' "$json" | jq -r '.[0].number')"
+          base="$(printf '%s' "$json" | jq -r '.[0].baseRefName')"
+          printf '%s' "$json" | jq -r '.[0].body // ""' >"$RUNNER_TEMP/pr-body.txt"
+          echo "pr_number=$number" >>"$GITHUB_OUTPUT"
+          echo "base_ref=$base" >>"$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >>"$GITHUB_OUTPUT"
+          echo "PR_NUMBER=$number" >>"$GITHUB_ENV"
+          echo "BASE_REF=$base" >>"$GITHUB_ENV"
+          echo "BRANCH=$BRANCH" >>"$GITHUB_ENV"
 
       - name: Merge base into PR branch
         run: |
@@ -237,10 +284,9 @@ jobs:
           echo "$HOME/.local/bin" >>"$GITHUB_PATH"
 
       - name: Write tests agent prompt
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           set -euo pipefail
+          PR_BODY="$(cat "$RUNNER_TEMP/pr-body.txt")"
           {
             cat <<'PROMPT'
           Follow .cursor/agents/change-triage.md and .cursor/agents/cypress-test-writer.md yourself.
@@ -291,7 +337,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: tests-${{ github.event.pull_request.number }}
+          name: tests-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/results.md
             ${{ runner.temp }}/agent.patch
@@ -301,7 +347,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tests-trail-${{ github.event.pull_request.number }}
+          name: tests-trail-${{ github.run_id }}
           path: ${{ runner.temp }}/tests-trail.ndjson
           if-no-files-found: ignore
 
@@ -314,20 +360,19 @@ jobs:
       contents: write
       pull-requests: write
     env:
-      BASE_REF: ${{ github.event.pull_request.base.ref }}
-      BRANCH: ${{ github.event.pull_request.head.ref }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_REF: ${{ needs.tests.outputs.base_ref }}
+      BRANCH: ${{ needs.tests.outputs.branch }}
+      PR_NUMBER: ${{ needs.tests.outputs.pr_number }}
     steps:
-      - name: Checkout PR branch
+      - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Download tests artifact
         uses: actions/download-artifact@v4
         with:
-          name: tests-${{ github.event.pull_request.number }}
+          name: tests-${{ github.run_id }}
           path: ${{ runner.temp }}/tests-artifact
 
       - name: Merge base into PR branch
