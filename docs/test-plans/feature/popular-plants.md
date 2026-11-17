@@ -4,7 +4,7 @@
 
 Every plant page gets a **Popular right now** list in the plant-page slot, under the description. It shows four plants, most popular first, each with "{N} sold this month", and it leaves out the plant on screen. Popularity is **units sold, not orders**: a workshop that buys 40 cuttings in one order counts as 40. Only the last 30 days count, ties go by name A to Z, and **out-of-stock plants are left out**. New surface: `GET /api/popular?limit=N` (1–12, default 4) returns `PopularList` `{ days: 30, items: PopularPlant[] }`, where `PopularPlant` is `PlantSummary` plus `unitsSold`. A limit outside 1–12 gets `400 validation_error`. There are also two speed rules at 20 shoppers browsing at once: 95% of `GET /api/popular` answers within 300 ms with no failed requests, and 95% of `GET /api/plants` answers still within 300 ms.
 
-Changed files: `api/src/features/popular.ts`, `web/src/components/PopularList.tsx` and its CSS, `web/src/slots/plant-page/popular.tsx`, and `docs/features/popular-plants.md`. The slot asks for `/popular?limit=5` and the component drops the current plant, then keeps the first four.
+Changed files (feature): `api/src/features/popular.ts`, `web/src/components/PopularList.tsx` and its CSS, `web/src/slots/plant-page/popular.tsx`, and `docs/features/popular-plants.md`. The slot asks for `/popular?limit=5` and the component drops the current plant, then keeps the first four.
 
 No money, checkout or order rows: the change touches no prices, cart or orders. Privacy and sign-in rows come first. Expectations below are the documented ones: a failure against the app is a possible finding, not a reason to change the assertion.
 
