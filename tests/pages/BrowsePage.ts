@@ -38,6 +38,21 @@ export class BrowsePage {
     return this.plantCardByName(name).getByRole('img');
   }
 
+  /** Low-stock badge text on a named catalog card (e.g. “Only 3 left”). */
+  plantCardStockBadge(name: string, text: string | RegExp): Locator {
+    return this.plantCardByName(name).getByText(text);
+  }
+
+  /** Out-of-stock overlay on a named catalog card. */
+  plantCardOutOfStock(name: string): Locator {
+    return this.plantCardByName(name).getByText('Out of stock');
+  }
+
+  /** Save (heart) control inside a named catalog card. */
+  plantCardSaveButton(name: string): Locator {
+    return this.plantCardByName(name).getByRole('button');
+  }
+
   /**
    * Opens the catalog at `/`.
    * @returns This browse page.

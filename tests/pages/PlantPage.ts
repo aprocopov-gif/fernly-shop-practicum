@@ -9,6 +9,8 @@ export class PlantPage {
   readonly yourReview: Locator;
   readonly postReviewButton: Locator;
   readonly ratingGroup: Locator;
+  readonly notifyEmail: Locator;
+  readonly notifyMeButton: Locator;
 
   constructor(private readonly page: Page) {
     this.plantNameHeading = page.getByRole('heading', { level: 1 });
@@ -19,6 +21,29 @@ export class PlantPage {
     this.yourReview = page.getByLabel('Your review');
     this.postReviewButton = page.getByRole('button', { name: 'Post review' });
     this.ratingGroup = page.getByRole('radiogroup', { name: 'Your rating' });
+    this.notifyEmail = page.getByLabel("Email me when it's back");
+    this.notifyMeButton = page.getByRole('button', { name: 'Notify me' });
+  }
+
+  /** Confirmation that a restock email will be sent to this address. */
+  notifyConfirmation(email: string): Locator {
+    return this.page.getByRole('status').filter({ hasText: email });
+  }
+
+  /** API / form refusal for notify (e.g. already subscribed). */
+  notifyAlert(): Locator {
+    return this.page.getByRole('alert');
+  }
+
+  /**
+   * Signs up for a restock email without requiring an account.
+   * @param email Full address to notify.
+   * @returns This plant page.
+   */
+  async notifyWhenBack(email: string): Promise<PlantPage> {
+    await this.notifyEmail.fill(email);
+    await this.notifyMeButton.click();
+    return this;
   }
 
   /** Average line in the Reviews section (e.g. “4.7 out of 5 · 3 reviews”). */
