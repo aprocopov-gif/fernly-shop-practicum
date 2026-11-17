@@ -9,6 +9,9 @@ export class PlantPage {
   readonly yourReview: Locator;
   readonly postReviewButton: Locator;
   readonly ratingGroup: Locator;
+  readonly popularHeading: Locator;
+  readonly popularRegion: Locator;
+  readonly popularLinks: Locator;
 
   constructor(private readonly page: Page) {
     this.plantNameHeading = page.getByRole('heading', { level: 1 });
@@ -19,6 +22,14 @@ export class PlantPage {
     this.yourReview = page.getByLabel('Your review');
     this.postReviewButton = page.getByRole('button', { name: 'Post review' });
     this.ratingGroup = page.getByRole('radiogroup', { name: 'Your rating' });
+    this.popularHeading = page.getByRole('heading', { level: 2, name: 'Popular right now' });
+    this.popularRegion = page.getByRole('region', { name: 'Popular right now' });
+    this.popularLinks = this.popularRegion.getByRole('link');
+  }
+
+  /** Sold-this-month text for a popular plant name (e.g. “128 sold this month”). */
+  popularSoldText(text: string | RegExp): Locator {
+    return this.popularRegion.getByText(text);
   }
 
   /** Average line in the Reviews section (e.g. “4.7 out of 5 · 3 reviews”). */

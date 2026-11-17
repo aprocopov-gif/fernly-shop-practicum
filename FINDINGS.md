@@ -257,6 +257,17 @@ Failing tests that prove a finding are tagged `@known-bug` so `npm run cy:compon
 - **Contradicts:** `docs/features/plant-reviews.md`: “After posting, the review appears in the list right away.”
 - **Suggested fix:** Invalidate `['reviews', plantId]` (match the query key).
 
+### F-23. Popular list includes out-of-stock plants
+
+- **Where:** `GET /api/popular` (and the plant page **Popular right now** list that consumes it)
+- **Category:** Business rules in the API
+- **Impact:** A shopper can follow a popular link to Chinese Money Plant (`pl-pilea`) and cannot buy it (stock 0).
+- **Evidence:** Executed (possible finding from `docs/test-plans/feature/popular-plants.md`):
+  - `tests/api/popular.spec.ts` — “A2 GET /api/popular leaves out out-of-stock plants including pl-pilea” (`pl-pilea` appears with `stock` 0)
+  - `tests/e2e/popular-plants.spec.ts` — “E1 plant page Popular right now…” (Chinese Money Plant link is present)
+- **Contradicts:** `docs/features/popular-plants.md`: “Plants that are out of stock are left out — there's no point sending a customer to a plant they can't buy.” OpenAPI: “Out-of-stock plants are left out.”
+- **Suggested fix:** Filter `stock < 1` out of the popular ranking before applying `limit`.
+
 ## Suspicions — not yet tested
 
 Things that look different from `docs/PRODUCT.md` (or the API contract) but do not yet have a failing Fernly test proving them. "Seen" means it showed up once on the walk; "code" means it comes from reading the source only.
@@ -265,6 +276,7 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 - **Page titles** (Accessibility) — seen: every page has the title "Fernly — plants for every windowsill". *May contradict:* WCAG 2.4.2 Page Titled under the PRODUCT AA aim.
 - **Order page after signing out and in as another customer** (Caching / Authorization) — code: sign-out drops cached cart and order list but not `['order', id]`. *May contradict:* "Signing out forgets the session on this device." (cross-customer `GET` itself is **F-15**).
 - **Plant page quantity after a "Likes the same light" link** (Pages) — code: quantity and size state are not reset when `plantId` changes. *May contradict:* "**Quantity** starts at 1 …"
+- **Popular ranking may count orders, not units** (Business rules in the API) — code (inspected only during popular-plants triage): ranking adds 1 per sale and ignores `quantity`. *May contradict:* `docs/features/popular-plants.md` “units sold, not orders”. Black-box proof waits on plan row **Q3**.
 
 ## Questions — neither document answers
 
@@ -276,6 +288,7 @@ Things that look different from `docs/PRODUCT.md` (or the API contract) but do n
 - Should a signed-in customer who opens `/login` or `/register` be redirected? The form shows again.
 - Promo plan rows **Q1–Q4** (`docs/test-plans/feature/promo-codes.md`): spaces around a code; a discount with no code; free-shipping hint while `FREESHIP` is applied under $50; what happens to the code after the last plant is removed. Neither `PRODUCT.md` nor `docs/features/promo-codes.md` answers these — no tests written.
 - Plant-reviews plan rows **Q1–Q5** (`docs/test-plans/feature/plant-reviews.md`): exact empty-state sentence; exact thanks toast wording; whether the plant page exposes a delete control; exact `already_reviewed` / author-mismatch `detail` beyond “Review not found”; whether the UI hides **Write a review** after the customer already reviewed. No tests written (`assumed — ask`).
+- Popular-plants plan rows **Q1–Q6** (`docs/test-plans/feature/popular-plants.md`): empty/repeated `limit`; whether new shop orders change `unitsSold`; oracle for units-vs-orders and the 30-day window; loading/error UI for the list; load tool/profile for L1/L2; “1 sold” / “0 sold” copy. No tests written (`assumed — ask`). L1/L2 wait on **Q5**.
 - Does the Orders list UI re-sort if the fixture/API array is oldest-first, or must the payload already be newest-first? (OR-A2)
 
 ## Rules to prove next
