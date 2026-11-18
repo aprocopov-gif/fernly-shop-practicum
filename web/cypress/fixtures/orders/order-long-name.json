@@ -1,0 +1,28 @@
+{
+  "id": "ord-long",
+  "status": "placed",
+  "createdAt": "2026-11-05T15:00:00.000Z",
+  "lines": [
+    {
+      "id": "ln-long-1",
+      "plantId": "pl-thai",
+      "name": "Variegated Thai Constellation Monstera (Collector's Edition, Limited Greenhouse Batch, Greenhouse Row Twelve, North Bench)",
+      "size": "L",
+      "unitPrice": 189,
+      "quantity": 1,
+      "lineTotal": 189,
+      "imageUrl": "/plants/monstera.svg"
+    }
+  ],
+  "subtotal": 189,
+  "discount": 0,
+  "promoCode": null,
+  "shipping": 0,
+  "total": 189,
+  "shippingAddress": {
+    "fullName": "Ava Green",
+    "address": "1 Fern Lane",
+    "city": "Portland",
+    "postalCode": "97201"
+  }
+}
